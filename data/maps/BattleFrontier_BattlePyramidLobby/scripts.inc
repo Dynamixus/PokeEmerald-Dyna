@@ -411,7 +411,7 @@ BattleFrontier_BattlePyramidLobby_EventScript_HintGiver::
 # 206 "data/maps/BattleFrontier_BattlePyramidLobby/scripts.pory"
 	msgbox BattleFrontier_BattlePyramidLobby_Text_TellYouWhatMisfortunesAwait, MSGBOX_DEFAULT
 # 207 "data/maps/BattleFrontier_BattlePyramidLobby/scripts.pory"
-	call BattleFrontier_BattlePyramidLobby_EventScript_GiveHint
+	call BattleFrontier_BattlePyramidLobby_EventScript_GiveHintLvOpen
 # 208 "data/maps/BattleFrontier_BattlePyramidLobby/scripts.pory"
 	msgbox BattleFrontier_BattlePyramidLobby_Text_BelieveMyFortunesOrNot, MSGBOX_DEFAULT
 # 209 "data/maps/BattleFrontier_BattlePyramidLobby/scripts.pory"

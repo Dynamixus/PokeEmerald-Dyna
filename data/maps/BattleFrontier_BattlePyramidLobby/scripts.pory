@@ -204,7 +204,7 @@ BattleFrontier_BattlePyramidLobby_EventScript_HintGiver::
 	applymovement LOCALID_HINT_GIVER, Common_Movement_FacePlayer
 	waitmovement 0
 	msgbox BattleFrontier_BattlePyramidLobby_Text_TellYouWhatMisfortunesAwait, MSGBOX_DEFAULT
-	call BattleFrontier_BattlePyramidLobby_EventScript_GiveHint
+	call BattleFrontier_BattlePyramidLobby_EventScript_GiveHintLvOpen
 	msgbox BattleFrontier_BattlePyramidLobby_Text_BelieveMyFortunesOrNot, MSGBOX_DEFAULT
 	releaseall
 	end
