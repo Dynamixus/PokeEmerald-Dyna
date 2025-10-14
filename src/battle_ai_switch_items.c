@@ -1888,7 +1888,10 @@ static s32 GetMaxDamagePlayerCouldDealToSwitchin(u32 battler, u32 opposingBattle
         {
             damageTaken = AI_CalcPartyMonDamage(playerMove, opposingBattler, battler, battleMon, AI_DEFENDING_NORMAL);
             if (playerMove == gBattleStruct->choicedMove[opposingBattler]) // If player is choiced, only care about the choice locked move
+            {
+                *bestPlayerMove = playerMove;
                 return damageTaken;
+            }
             if (damageTaken > maxDamageTaken)
             {
                 maxDamageTaken = damageTaken;
@@ -1904,9 +1907,11 @@ static s32 GetMaxPriorityDamagePlayerCouldDealToSwitchin(u32 battler, u32 opposi
     int i = 0;
     u32 playerMove;
     s32 damageTaken = 0, maxDamageTaken = 0;
-
     for (i = 0; i < MAX_MON_MOVES; i++)
     {
+        // If player is choiced into a non-priority move, AI understands that it can't deal priority damage
+        if (gBattleStruct->choicedMove[opposingBattler] !=MOVE_NONE && GetMovePriority(opposingBattler,gBattleStruct->choicedMove[opposingBattler]) < 1)
+            break;
         playerMove = gBattleMons[opposingBattler].moves[i];
         if (playerMove != MOVE_NONE
             && GetMovePriority(opposingBattler, playerMove) > 0
@@ -1916,7 +1921,10 @@ static s32 GetMaxPriorityDamagePlayerCouldDealToSwitchin(u32 battler, u32 opposi
         {
             damageTaken = AI_CalcPartyMonDamage(playerMove, opposingBattler, battler, battleMon, AI_DEFENDING_NORMAL);
             if (playerMove == gBattleStruct->choicedMove[opposingBattler]) // If player is choiced, only care about the choice locked move
+            {
+                *bestPlayerPriorityMove = playerMove;
                 return damageTaken;
+            }
             if (damageTaken > maxDamageTaken)
             {
                 maxDamageTaken = damageTaken;
@@ -1926,7 +1934,6 @@ static s32 GetMaxPriorityDamagePlayerCouldDealToSwitchin(u32 battler, u32 opposi
     }
     return maxDamageTaken;
 }
-
 static bool32 CanAbilityTrapOpponent(u16 ability, u32 opponent)
 {
     if ((B_GHOSTS_ESCAPE >= GEN_6 && IS_BATTLER_OF_TYPE(opponent, TYPE_GHOST)))
