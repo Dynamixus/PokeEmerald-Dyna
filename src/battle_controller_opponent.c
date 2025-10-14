@@ -678,6 +678,11 @@ static void OpponentHandleChoosePokemon(u32 battler)
         if (IsSwitchOutEffect(gMovesInfo[gCurrentMove].effect) || AI_DATA->ejectButtonSwitch || AI_DATA->ejectPackSwitch)
             switchType = SWITCH_MID_BATTLE;
         
+        // reset the AI data to consider the correct on-field state at time of switch
+        SetBattlerAiData(GetBattlerAtPosition(B_POSITION_PLAYER_LEFT), AI_DATA);
+        if (IsDoubleBattle())
+            SetBattlerAiData(GetBattlerAtPosition(B_POSITION_PLAYER_RIGHT), AI_DATA);
+        
         chosenMonId = GetMostSuitableMonToSwitchInto(battler, switchType);
         if (chosenMonId == PARTY_SIZE)
         {
