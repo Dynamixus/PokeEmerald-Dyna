@@ -1786,7 +1786,7 @@ static void MoveSelectionDisplayMoveType(u32 battler)
     else if (P_SHOW_DYNAMIC_TYPES) // Non-vanilla changes to battle UI showing dynamic types
     {
         struct Pokemon *mon = &gPlayerParty[gBattlerPartyIndexes[battler]];
-        type = CheckDynamicMoveType(mon, moveInfo->moves[gMoveSelectionCursor[battler]], battler);
+        type = CheckDynamicMoveType(mon, moveInfo->moves[gMoveSelectionCursor[battler]], battler, gMain.inBattle);
     }
     end = StringCopy(txtPtr, gTypesInfo[type].name);
 
@@ -2467,7 +2467,7 @@ static u32 CheckTypeEffectiveness(u32 targetId, u32 battler)
     struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct *)(&gBattleResources->bufferA[battler][4]);
     struct Pokemon *mon = &gPlayerParty[gBattlerPartyIndexes[battler]];
     u32 move = moveInfo->moves[gMoveSelectionCursor[battler]];
-    u32 moveType = CheckDynamicMoveType(mon, move, battler);
+    u32 moveType = CheckDynamicMoveType(mon, move, battler, gMain.inBattle);
 
     if (move != MOVE_NONE && move != MOVE_UNAVAILABLE && gMovesInfo[move].power > 0)
     {
