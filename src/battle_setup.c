@@ -1406,7 +1406,6 @@ void BattleSetup_StartTrainerBattle(void)
         {
             FillFrontierTrainerParty(1);
             ZeroMonData(&gEnemyParty[1]);
-            ZeroMonData(&gEnemyParty[2]);
         }
 
         MarkApproachingPyramidTrainersAsBattled();

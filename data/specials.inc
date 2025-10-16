@@ -171,6 +171,9 @@ gSpecials::
 	def_special StartWallyTutorialBattle
 	def_special ChangePokemonNickname
 	def_special ChoosePartyMon
+	def_special LoadOpponentPartyIntoPlayerParty
+	def_special DisplayPartyForTeamPreview
+	def_special ReloadPlayerParty
 	def_special GetFirstFreePokeblockSlot
 	def_special DoBerryBlending
 	def_special PlayRoulette
@@ -257,9 +260,11 @@ gSpecials::
 	def_special CallFallarborTentFunction
 	def_special CallSlateportTentFunction
 	def_special ChoosePartyForBattleFrontier
+	def_special ChoosePartyForBattleFrontier6V6
 	def_special ValidateEReaderTrainer
 	def_special GetBattleTowerSinglesStreak
 	def_special ReducePlayerPartyToSelectedMons
+	def_special ReducePlayerPartyToSelectedMons6V6
 	def_special BedroomPC
 	def_special PlayerPC
 	def_special FieldShowRegionMap
