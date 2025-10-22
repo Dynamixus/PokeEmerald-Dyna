@@ -154,19 +154,39 @@ script InsideOfTruck_EventScript_DifficultyOptions {
 	msgbox(WhichDifficulty)
 	switch(var(VAR_GAME_SETTING_DIFFICULTY_MODE))
 	{
-		case GAME_SETTING_DIFFICULTY_NORMAL_MODE:
-            dynmultipush("{COLOR GREEN}{SHADOW LIGHT_GREEN}Normal", GAME_SETTING_DIFFICULTY_NORMAL_MODE)
+		case GAME_SETTING_DIFFICULTY_VANILLA_MODE:
+            dynmultipush("{COLOR GREEN}{SHADOW LIGHT_GREEN}Vanilla", GAME_SETTING_DIFFICULTY_VANILLA_MODE)
 			dynmultipush("Easy", GAME_SETTING_DIFFICULTY_EASY_MODE)
+			dynmultipush("Normal", GAME_SETTING_DIFFICULTY_NORMAL_MODE)
+			dynmultipush("Hard", GAME_SETTING_DIFFICULTY_HARD_MODE)
 			dynmultipush("Done", MULTI_B_PRESSED)
 
-        case GAME_SETTING_DIFFICULTY_EASY_MODE:
-			dynmultipush("Normal", GAME_SETTING_DIFFICULTY_NORMAL_MODE)
+		case GAME_SETTING_DIFFICULTY_EASY_MODE:
+			dynmultipush("Vanilla", GAME_SETTING_DIFFICULTY_VANILLA_MODE)
 			dynmultipush("{COLOR GREEN}{SHADOW LIGHT_GREEN}Easy", GAME_SETTING_DIFFICULTY_EASY_MODE)
+			dynmultipush("Normal", GAME_SETTING_DIFFICULTY_NORMAL_MODE)
+			dynmultipush("Hard", GAME_SETTING_DIFFICULTY_HARD_MODE)
 			dynmultipush("Done", MULTI_B_PRESSED)
-		
-		default:
-			dynmultipush("{COLOR GREEN}{SHADOW LIGHT_GREEN}Normal", GAME_SETTING_DIFFICULTY_NORMAL_MODE)
+
+		case GAME_SETTING_DIFFICULTY_NORMAL_MODE:
+			dynmultipush("Vanilla", GAME_SETTING_DIFFICULTY_VANILLA_MODE)
 			dynmultipush("Easy", GAME_SETTING_DIFFICULTY_EASY_MODE)
+            dynmultipush("{COLOR GREEN}{SHADOW LIGHT_GREEN}Normal", GAME_SETTING_DIFFICULTY_NORMAL_MODE)
+			dynmultipush("Hard", GAME_SETTING_DIFFICULTY_HARD_MODE)
+			dynmultipush("Done", MULTI_B_PRESSED)
+
+		case GAME_SETTING_DIFFICULTY_HARD_MODE:
+			dynmultipush("Vanilla", GAME_SETTING_DIFFICULTY_VANILLA_MODE)
+			dynmultipush("Easy", GAME_SETTING_DIFFICULTY_EASY_MODE)
+            dynmultipush("Normal", GAME_SETTING_DIFFICULTY_NORMAL_MODE)
+			dynmultipush("{COLOR GREEN}{SHADOW LIGHT_GREEN}Hard", GAME_SETTING_DIFFICULTY_HARD_MODE)
+			dynmultipush("Done", MULTI_B_PRESSED)
+
+		default:
+			dynmultipush("Vanilla", GAME_SETTING_DIFFICULTY_VANILLA_MODE)
+			dynmultipush("Easy", GAME_SETTING_DIFFICULTY_EASY_MODE)
+            dynmultipush("{COLOR GREEN}{SHADOW LIGHT_GREEN}Normal", GAME_SETTING_DIFFICULTY_NORMAL_MODE)
+			dynmultipush("Hard", GAME_SETTING_DIFFICULTY_HARD_MODE)
 			dynmultipush("Done", MULTI_B_PRESSED)
 	}
 	
@@ -213,6 +233,44 @@ script InsideOfTruck_EventScript_DifficultyOptions {
 			{
 				setvar(VAR_GAME_SETTING_DIFFICULTY_MODE, GAME_SETTING_DIFFICULTY_EASY_MODE)
 				msgbox(EasyDifficultyEnabled)
+			}
+			goto(InsideOfTruck_EventScript_DifficultyOptions)
+		}
+	}
+
+	if(var(VAR_RESULT) == GAME_SETTING_DIFFICULTY_HARD_MODE) 
+	{
+		if(var(VAR_GAME_SETTING_DIFFICULTY_MODE) == GAME_SETTING_DIFFICULTY_HARD_MODE)
+		{
+			msgbox(HardDifficultyCurrentlySelected)
+			goto(InsideOfTruck_EventScript_DifficultyOptions)
+		}
+		else
+		{
+			msgbox(HardDifficultyYesNo, MSGBOX_YESNO)
+			if(var(VAR_RESULT) == YES)
+			{
+				setvar(VAR_GAME_SETTING_DIFFICULTY_MODE, GAME_SETTING_DIFFICULTY_HARD_MODE)
+				msgbox(HardDifficultyEnabled)
+			}
+			goto(InsideOfTruck_EventScript_DifficultyOptions)
+		}
+	}
+
+	if(var(VAR_RESULT) == GAME_SETTING_DIFFICULTY_VANILLA_MODE) 
+	{
+		if(var(VAR_GAME_SETTING_DIFFICULTY_MODE) == GAME_SETTING_DIFFICULTY_VANILLA_MODE)
+		{
+			msgbox(VanillaDifficultyCurrentlySelected)
+			goto(InsideOfTruck_EventScript_DifficultyOptions)
+		}
+		else
+		{
+			msgbox(VanillaDifficultyYesNo, MSGBOX_YESNO)
+			if(var(VAR_RESULT) == YES)
+			{
+				setvar(VAR_GAME_SETTING_DIFFICULTY_MODE, GAME_SETTING_DIFFICULTY_VANILLA_MODE)
+				msgbox(VanillaDifficultyEnabled)
 			}
 			goto(InsideOfTruck_EventScript_DifficultyOptions)
 		}
@@ -541,6 +599,16 @@ text EasyDifficultyCurrentlySelected
 	"mode if you wish to change it."
 }
 
+text HardDifficultyCurrentlySelected
+{
+	"hard mode texxt filler TODO iriv"
+}
+
+text VanillaDifficultyCurrentlySelected
+{
+	"vanilla mode texxt filler TODO iriv"
+}
+
 text NormalDifficultyYesNo
 {
 	"This is the recommended difficulty\n"
@@ -571,6 +639,20 @@ text EasyDifficultyYesNo
 	"{COLOR GREEN}{SHADOW LIGHT_GREEN}Easy Mode?"
 }
 
+text HardDifficultyYesNo
+{
+	"hard mode filler\n"
+	"Do you want to turn on\l"
+	"{COLOR GREEN}{SHADOW LIGHT_GREEN}Hard Mode?"
+}
+
+text VanillaDifficultyYesNo
+{
+	"vanilla mode filler\n"
+	"Do you want to turn on\l"
+	"{COLOR GREEN}{SHADOW LIGHT_GREEN}Vanilla Mode?"
+}
+
 text NormalDifficultyEnabled
 {
 	"{COLOR GREEN}{SHADOW LIGHT_GREEN}Normal Mode{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY} enabled."
@@ -579,6 +661,16 @@ text NormalDifficultyEnabled
 text EasyDifficultyEnabled
 {
 	"{COLOR GREEN}{SHADOW LIGHT_GREEN}Easy Mode{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY} enabled."
+}
+
+text HardDifficultyEnabled
+{
+	"{COLOR GREEN}{SHADOW LIGHT_GREEN}Hard Mode{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY} enabled."
+}
+
+text VanillaDifficultyEnabled
+{
+	"{COLOR GREEN}{SHADOW LIGHT_GREEN}Vanilla Mode{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY} enabled."
 }
 
 text MinGrindingAlreadyOnYesNo
