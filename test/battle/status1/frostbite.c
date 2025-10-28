@@ -39,7 +39,7 @@ SINGLE_BATTLE_TEST("Frostbite deals 1/16th (Gen7+) or 1/8th damage to affected p
    } THEN { EXPECT_EQ(frostbiteDamage, opponent->maxHP / ((B_BURN_DAMAGE >= GEN_7) ? 16 : 8)); }
 }
 
-SINGLE_BATTLE_TEST("Frostbite is healed if hit with a thawing move")
+SINGLE_BATTLE_TEST("Frostbite is healed if hit with a thawing move (fire type or has burn effect)")
 {
     u32 move;
 
@@ -56,13 +56,7 @@ SINGLE_BATTLE_TEST("Frostbite is healed if hit with a thawing move")
         TURN { MOVE(player, move); }
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, move, player);
-        if (move == MOVE_EMBER) {
-            NONE_OF {
-                MESSAGE("Foe Wobbuffet's frostbite was healed!");
-            }
-        } else {
-            MESSAGE("Foe Wobbuffet's frostbite was healed!");
-        }
+        MESSAGE("Foe Wobbuffet's frostbite was healed!");
    }
 }
 
@@ -75,6 +69,7 @@ SINGLE_BATTLE_TEST("Frostbite is healed when the user uses a thawing move")
     PARAMETRIZE { move = MOVE_FLARE_BLITZ; }
     PARAMETRIZE { move = MOVE_FUSION_FLARE; }
     PARAMETRIZE { move = MOVE_EMBER; }
+    PARAMETRIZE { move = MOVE_SCALD; }
 
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Status1(STATUS1_FROSTBITE); }
