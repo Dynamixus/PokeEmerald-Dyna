@@ -4801,14 +4801,20 @@ static u32 AI_CalcMoveEffectScore(u32 battlerAtk, u32 battlerDef, u32 move)
                     if (!ShouldLowerSpeed(battlerAtk, battlerDef, aiData->abilities[battlerDef]))
                         break;
                 case MOVE_EFFECT_ATK_MINUS_1:
-                case MOVE_EFFECT_DEF_MINUS_1:
+                case MOVE_EFFECT_ATK_MINUS_2:
+                    if (ShouldLowerStat(battlerDef, aiData->abilities[battlerDef], GetStatBeingLoweredFromMoveEffect(gMovesInfo[move].additionalEffects[i].moveEffect)) && HasMoveWithCategory(battlerDef, DAMAGE_CATEGORY_PHYSICAL))
+                        ADJUST_SCORE(DECENT_EFFECT);
+                    break;
                 case MOVE_EFFECT_SP_ATK_MINUS_1:
+                case MOVE_EFFECT_SP_ATK_MINUS_2:
+                    if (ShouldLowerStat(battlerDef, aiData->abilities[battlerDef], GetStatBeingLoweredFromMoveEffect(gMovesInfo[move].additionalEffects[i].moveEffect)) && HasMoveWithCategory(battlerDef, DAMAGE_CATEGORY_SPECIAL))
+                        ADJUST_SCORE(DECENT_EFFECT);
+                    break;
+                case MOVE_EFFECT_DEF_MINUS_1:
                 case MOVE_EFFECT_SP_DEF_MINUS_1:
                 case MOVE_EFFECT_ACC_MINUS_1:
                 case MOVE_EFFECT_EVS_MINUS_1:
-                case MOVE_EFFECT_ATK_MINUS_2:
                 case MOVE_EFFECT_DEF_MINUS_2:
-                case MOVE_EFFECT_SP_ATK_MINUS_2:
                 case MOVE_EFFECT_SP_DEF_MINUS_2:
                 case MOVE_EFFECT_ACC_MINUS_2:
                 case MOVE_EFFECT_EVS_MINUS_2:

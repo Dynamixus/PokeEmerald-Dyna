@@ -171,3 +171,61 @@ AI_SINGLE_BATTLE_TEST("Explosion interaction - glalie should correctly score cru
         }
     }
 }
+
+AI_SINGLE_BATTLE_TEST("Guaranteed secondary effect - AI should care about player's moveset for attack and special attack drops (spatk drop vs atk only set)"){
+    GIVEN{
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_TRY_TO_FAINT | AI_FLAG_CHECK_VIABILITY | AI_FLAG_SMART_SWITCHING | AI_FLAG_SMART_MON_CHOICES | AI_FLAG_OMNISCIENT);
+        PLAYER(SPECIES_RUNERIGUS){
+            Level(59);
+            Speed(5);
+            // no item
+            Nature(NATURE_RELAXED);
+            Ability(ABILITY_SHADOW_SHIELD);
+            Moves(MOVE_EARTHQUAKE, MOVE_SCARY_FACE);
+        }
+        OPPONENT(SPECIES_IRON_VALIANT){
+            Level(59);
+            Speed(10);
+            Item(ITEM_BOOSTER_ENERGY);
+            Nature(NATURE_JOLLY);
+            // ability should default to quark drive
+            Moves(MOVE_CLOSE_COMBAT, MOVE_SPIRIT_BREAK, MOVE_BULK_UP, MOVE_KNOCK_OFF);
+        }
+        // previously - spirit break +3 most damaging move (w/ plus effect) and guaranteed effect +2 vs knock off +0 (neutral dmg move) and bulk up +2
+        // now - player slow 3hko vs AI - knock off/spirit break +1 neutral effect damaging moves, bulk up +2 shouldSetup = true
+    } WHEN {
+        TURN{
+            MOVE(player, MOVE_SCARY_FACE);
+            EXPECT_MOVE(opponent, MOVE_BULK_UP);
+        }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("Guaranteed secondary effect - AI should care about player's moveset for attack and special attack drops (atk drop vs spatk only set)"){
+    GIVEN{
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_TRY_TO_FAINT | AI_FLAG_CHECK_VIABILITY | AI_FLAG_SMART_SWITCHING | AI_FLAG_SMART_MON_CHOICES | AI_FLAG_OMNISCIENT);
+        PLAYER(SPECIES_RUNERIGUS){
+            Level(59);
+            Speed(5);
+            // no item
+            Nature(NATURE_RELAXED);
+            Ability(ABILITY_SHADOW_SHIELD);
+            Moves(MOVE_SHADOW_BALL, MOVE_SCARY_FACE);
+        }
+        OPPONENT(SPECIES_IRON_VALIANT){
+            Level(59);
+            Speed(10);
+            Item(ITEM_BOOSTER_ENERGY);
+            Nature(NATURE_JOLLY);
+            // ability should default to quark drive
+            Moves(MOVE_CLOSE_COMBAT, MOVE_LUNGE, MOVE_BULK_UP, MOVE_KNOCK_OFF);
+        }
+        // previously - spirit break +3 most damaging move (w/ plus effect) and guaranteed effect +2 vs knock off +0 (neutral dmg move) and bulk up +2
+        // now - player slow 3hko vs AI - knock off/spirit break +1 neutral effect damaging moves, bulk up +2 shouldSetup = true
+    } WHEN {
+        TURN{
+            MOVE(player, MOVE_SCARY_FACE);
+            EXPECT_MOVE(opponent, MOVE_BULK_UP);
+        }
+    }
+}
