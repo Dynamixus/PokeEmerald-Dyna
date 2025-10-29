@@ -68,7 +68,6 @@ InsideOfTruck_EventScript_SetDefaultSettings:
 	setflag FLAG_MIN_GRINDING_MODE
 	clearflag FLAG_RANDOMIZER_ENABLED
 	clearflag FLAG_RANDOM_ABILITIES_ENABLED
-	clearflag FLAG_RANDOM_ABILITIES_ENABLED
 	special ForceBattleStyleSetPleaseGod
 	setvar VAR_RANDOMIZER_MODE, MAX_MON_MODE
 	return
@@ -141,6 +140,11 @@ script InsideOfTruck_EventScript_StartSettingsMenu {
 
 	if (var(VAR_RESULT) == 2)
 	{
+		if(var(VAR_GAME_SETTING_DIFFICULTY_MODE) == GAME_SETTING_DIFFICULTY_HOF_MODE)
+		{
+			msgbox(CannotChangeRandomizerInHoFMode)
+			goto(InsideOfTruck_EventScript_StartSettingsMenu)
+		}
 		goto(InsideOfTruck_EventScript_RandomzierOptions)	
 	}
 
@@ -159,6 +163,7 @@ script InsideOfTruck_EventScript_DifficultyOptions {
 			dynmultipush("Easy", GAME_SETTING_DIFFICULTY_EASY_MODE)
 			dynmultipush("Normal", GAME_SETTING_DIFFICULTY_NORMAL_MODE)
 			dynmultipush("Hard", GAME_SETTING_DIFFICULTY_HARD_MODE)
+			dynmultipush("Hall of Fame", GAME_SETTING_DIFFICULTY_HOF_MODE)
 			dynmultipush("Done", MULTI_B_PRESSED)
 
 		case GAME_SETTING_DIFFICULTY_EASY_MODE:
@@ -166,6 +171,7 @@ script InsideOfTruck_EventScript_DifficultyOptions {
 			dynmultipush("{COLOR GREEN}{SHADOW LIGHT_GREEN}Easy", GAME_SETTING_DIFFICULTY_EASY_MODE)
 			dynmultipush("Normal", GAME_SETTING_DIFFICULTY_NORMAL_MODE)
 			dynmultipush("Hard", GAME_SETTING_DIFFICULTY_HARD_MODE)
+			dynmultipush("Hall of Fame", GAME_SETTING_DIFFICULTY_HOF_MODE)
 			dynmultipush("Done", MULTI_B_PRESSED)
 
 		case GAME_SETTING_DIFFICULTY_NORMAL_MODE:
@@ -173,6 +179,7 @@ script InsideOfTruck_EventScript_DifficultyOptions {
 			dynmultipush("Easy", GAME_SETTING_DIFFICULTY_EASY_MODE)
             dynmultipush("{COLOR GREEN}{SHADOW LIGHT_GREEN}Normal", GAME_SETTING_DIFFICULTY_NORMAL_MODE)
 			dynmultipush("Hard", GAME_SETTING_DIFFICULTY_HARD_MODE)
+			dynmultipush("Hall of Fame", GAME_SETTING_DIFFICULTY_HOF_MODE)
 			dynmultipush("Done", MULTI_B_PRESSED)
 
 		case GAME_SETTING_DIFFICULTY_HARD_MODE:
@@ -180,6 +187,15 @@ script InsideOfTruck_EventScript_DifficultyOptions {
 			dynmultipush("Easy", GAME_SETTING_DIFFICULTY_EASY_MODE)
             dynmultipush("Normal", GAME_SETTING_DIFFICULTY_NORMAL_MODE)
 			dynmultipush("{COLOR GREEN}{SHADOW LIGHT_GREEN}Hard", GAME_SETTING_DIFFICULTY_HARD_MODE)
+			dynmultipush("Hall of Fame", GAME_SETTING_DIFFICULTY_HOF_MODE)
+			dynmultipush("Done", MULTI_B_PRESSED)
+
+		case GAME_SETTING_DIFFICULTY_HOF_MODE:
+			dynmultipush("Vanilla", GAME_SETTING_DIFFICULTY_VANILLA_MODE)
+			dynmultipush("Easy", GAME_SETTING_DIFFICULTY_EASY_MODE)
+            dynmultipush("Normal", GAME_SETTING_DIFFICULTY_NORMAL_MODE)
+			dynmultipush("Hard", GAME_SETTING_DIFFICULTY_HARD_MODE)
+			dynmultipush("{COLOR GREEN}{SHADOW LIGHT_GREEN}Hall of Fame", GAME_SETTING_DIFFICULTY_HOF_MODE)
 			dynmultipush("Done", MULTI_B_PRESSED)
 
 		default:
@@ -187,6 +203,7 @@ script InsideOfTruck_EventScript_DifficultyOptions {
 			dynmultipush("Easy", GAME_SETTING_DIFFICULTY_EASY_MODE)
             dynmultipush("{COLOR GREEN}{SHADOW LIGHT_GREEN}Normal", GAME_SETTING_DIFFICULTY_NORMAL_MODE)
 			dynmultipush("Hard", GAME_SETTING_DIFFICULTY_HARD_MODE)
+			dynmultipush("Hall of Fame", GAME_SETTING_DIFFICULTY_HOF_MODE)
 			dynmultipush("Done", MULTI_B_PRESSED)
 	}
 	
@@ -275,10 +292,38 @@ script InsideOfTruck_EventScript_DifficultyOptions {
 			goto(InsideOfTruck_EventScript_DifficultyOptions)
 		}
 	}
+
+	if(var(VAR_RESULT) == GAME_SETTING_DIFFICULTY_HOF_MODE) 
+	{
+		if(var(VAR_GAME_SETTING_DIFFICULTY_MODE) == GAME_SETTING_DIFFICULTY_HOF_MODE)
+		{
+			msgbox(HoFDifficultyCurrentlySelected)
+			goto(InsideOfTruck_EventScript_DifficultyOptions)
+		}
+		else
+		{
+			msgbox(HoFDifficultyYesNo, MSGBOX_YESNO)
+			if(var(VAR_RESULT) == YES)
+			{
+				setvar(VAR_GAME_SETTING_DIFFICULTY_MODE, GAME_SETTING_DIFFICULTY_HOF_MODE)
+				clearflag(FLAG_MIN_GRINDING_MODE)
+				clearflag(FLAG_RANDOMIZER_ENABLED)
+				clearflag(FLAG_RANDOM_ABILITIES_ENABLED)
+				special(ForceBattleStyleSetPleaseGod)
+				setvar(VAR_RANDOMIZER_MODE, MAX_MON_MODE)
+				msgbox(HoFDifficultyEnabled)
+			}
+			goto(InsideOfTruck_EventScript_DifficultyOptions)
+		}
+	}
 }
 
 script InsideOfTruck_EventScript_MinGrindingMode {
-	if(flag(FLAG_MIN_GRINDING_MODE))
+	if(var(VAR_GAME_SETTING_DIFFICULTY_MODE) == GAME_SETTING_DIFFICULTY_HOF_MODE)
+	{
+		msgbox(CannotToggleMGMInHoFMode)
+	}
+	elif(flag(FLAG_MIN_GRINDING_MODE))
 	{
 		msgbox(MinGrindingAlreadyOnYesNo, MSGBOX_YESNO)
 		if(var(VAR_RESULT) == YES)
@@ -609,6 +654,11 @@ text VanillaDifficultyCurrentlySelected
 	"vanilla mode texxt filler TODO iriv"
 }
 
+text HoFDifficultyCurrentlySelected
+{
+	"hof mode texxt filler TODO iriv"
+}
+
 text NormalDifficultyYesNo
 {
 	"This is the recommended difficulty\n"
@@ -641,14 +691,23 @@ text EasyDifficultyYesNo
 
 text HardDifficultyYesNo
 {
-	"hard mode filler\n"
+	"hard mode filler TODO iriv\n"
 	"Do you want to turn on\l"
 	"{COLOR GREEN}{SHADOW LIGHT_GREEN}Hard Mode?"
 }
 
+text HoFDifficultyYesNo
+{
+	"hof mode TODO iriv\n"
+	"This will disable Minimal Grinding Mode\l"
+	"and all Randomizer options.\p"
+	"Do you want to turn on\n"
+	"{COLOR GREEN}{SHADOW LIGHT_GREEN}Hall of Fame Mode?"
+}
+
 text VanillaDifficultyYesNo
 {
-	"vanilla mode filler\n"
+	"vanilla mode filler TODO iriv\n"
 	"Do you want to turn on\l"
 	"{COLOR GREEN}{SHADOW LIGHT_GREEN}Vanilla Mode?"
 }
@@ -671,6 +730,13 @@ text HardDifficultyEnabled
 text VanillaDifficultyEnabled
 {
 	"{COLOR GREEN}{SHADOW LIGHT_GREEN}Vanilla Mode{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY} enabled."
+}
+
+text HoFDifficultyEnabled
+{
+	"{COLOR GREEN}{SHADOW LIGHT_GREEN}Hall of Fame Mode{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY} enabled.\n"
+	"Minimal Grinding Mode and all Randomizer\l"
+	"options automatically disabled."
 }
 
 text MinGrindingAlreadyOnYesNo
@@ -711,6 +777,20 @@ text MinGrindingEnabled
 text MinGrindingDisabled
 {
 	"{COLOR RED}{SHADOW LIGHT_RED}Minimal Grinding Mode disabled."
+}
+
+text CannotToggleMGMInHoFMode
+{
+	"You cannot toggle Minimal Grinding Mode\n"
+	"with Hall of Fame Mode enabled.\l"
+	"Minimal Grinding Mode is disabled."
+}
+
+text CannotChangeRandomizerInHoFMode
+{
+	"You cannot change Randomizer options\n"
+	"with Hall of Fame Mode enabled.\l"
+	"All Randomizer options are disabled."
 }
 
 

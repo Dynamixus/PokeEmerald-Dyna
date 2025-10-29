@@ -116,6 +116,7 @@ const u8 gText_WelcomeToHOFHardNoMGM[] = _("Welcome to the Hall of Fame!\nEmeral
 const u8 gText_WelcomeToHOFHardMGM[] = _("Welcome to the Hall of Fame!\nEmerald Imperium 1.3.1 Hard / MGM");
 const u8 gText_WelcomeToHOFVanillaNoMGM[] = _("Welcome to the Hall of Fame!\nEmerald Imperium 1.3.1 Vanilla");
 const u8 gText_WelcomeToHOFVanillaMGM[] = _("Welcome to the Hall of Fame!\nEmerald Imperium 1.3.1 Vanilla / MGM");
+const u8 gText_WelcomeToHOFHOF[] = _("Welcome to the Hall of Fame!\nEmerald Imperium HoF Mode");
 const u8 gText_HOFDexRating[] = _("Spotted Pokémon: {STR_VAR_1}!\nOwned Pokémon: {STR_VAR_2}!\pPROF. BIRCH's Pokédex rating!\pPROF. BIRCH: Let's see…\p");
 const u8 gText_HOFDexSaving[] = _("SAVING…\nDON'T TURN OFF THE POWER.");
 const u8 gText_HOFCorrupted[] = _("The HALL OF FAME data is corrupted.");

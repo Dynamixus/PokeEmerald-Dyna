@@ -5,5 +5,6 @@
 #define GAME_SETTING_DIFFICULTY_EASY_MODE                     1
 #define GAME_SETTING_DIFFICULTY_NORMAL_MODE                   2
 #define GAME_SETTING_DIFFICULTY_HARD_MODE                     3
+#define GAME_SETTING_DIFFICULTY_HOF_MODE                      4
 
 #endif // GUARD_CONFIG_GAME_SETTINGS_H

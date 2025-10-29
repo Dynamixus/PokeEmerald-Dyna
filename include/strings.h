@@ -1921,6 +1921,7 @@ extern const u8 gText_WelcomeToHOFHardNoMGM[];
 extern const u8 gText_WelcomeToHOFHardMGM[];
 extern const u8 gText_WelcomeToHOFVanillaNoMGM[];
 extern const u8 gText_WelcomeToHOFVanillaMGM[];
+extern const u8 gText_WelcomeToHOFHOF[];
 extern const u8 gText_Number[];
 extern const u8 gText_Level[];
 extern const u8 gText_IDNumber[];
