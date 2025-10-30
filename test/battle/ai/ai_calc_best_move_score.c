@@ -178,7 +178,6 @@ AI_SINGLE_BATTLE_TEST("Guaranteed secondary effect - AI should care about player
         PLAYER(SPECIES_RUNERIGUS){
             Level(59);
             Speed(5);
-            // no item
             Nature(NATURE_RELAXED);
             Ability(ABILITY_SHADOW_SHIELD);
             Moves(MOVE_EARTHQUAKE, MOVE_SCARY_FACE);
@@ -188,11 +187,8 @@ AI_SINGLE_BATTLE_TEST("Guaranteed secondary effect - AI should care about player
             Speed(10);
             Item(ITEM_BOOSTER_ENERGY);
             Nature(NATURE_JOLLY);
-            // ability should default to quark drive
             Moves(MOVE_CLOSE_COMBAT, MOVE_SPIRIT_BREAK, MOVE_BULK_UP, MOVE_KNOCK_OFF);
         }
-        // previously - spirit break +3 most damaging move (w/ plus effect) and guaranteed effect +2 vs knock off +0 (neutral dmg move) and bulk up +2
-        // now - player slow 3hko vs AI - knock off/spirit break +1 neutral effect damaging moves, bulk up +2 shouldSetup = true
     } WHEN {
         TURN{
             MOVE(player, MOVE_SCARY_FACE);
@@ -207,7 +203,6 @@ AI_SINGLE_BATTLE_TEST("Guaranteed secondary effect - AI should care about player
         PLAYER(SPECIES_RUNERIGUS){
             Level(59);
             Speed(5);
-            // no item
             Nature(NATURE_RELAXED);
             Ability(ABILITY_SHADOW_SHIELD);
             Moves(MOVE_SHADOW_BALL, MOVE_SCARY_FACE);
@@ -217,15 +212,37 @@ AI_SINGLE_BATTLE_TEST("Guaranteed secondary effect - AI should care about player
             Speed(10);
             Item(ITEM_BOOSTER_ENERGY);
             Nature(NATURE_JOLLY);
-            // ability should default to quark drive
             Moves(MOVE_CLOSE_COMBAT, MOVE_LUNGE, MOVE_BULK_UP, MOVE_KNOCK_OFF);
         }
-        // previously - spirit break +3 most damaging move (w/ plus effect) and guaranteed effect +2 vs knock off +0 (neutral dmg move) and bulk up +2
-        // now - player slow 3hko vs AI - knock off/spirit break +1 neutral effect damaging moves, bulk up +2 shouldSetup = true
     } WHEN {
         TURN{
             MOVE(player, MOVE_SCARY_FACE);
             EXPECT_MOVE(opponent, MOVE_BULK_UP);
+        }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("MoveEffectInPlus - AI prefers stat drop to neutral move in 2+HKO cases"){
+    GIVEN{
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_TRY_TO_FAINT | AI_FLAG_CHECK_VIABILITY | AI_FLAG_SMART_SWITCHING | AI_FLAG_SMART_MON_CHOICES | AI_FLAG_OMNISCIENT);
+        PLAYER(SPECIES_RUNERIGUS){
+            Level(59);
+            Speed(5);
+            Nature(NATURE_RELAXED);
+            Ability(ABILITY_SHADOW_SHIELD);
+            Moves(MOVE_SHADOW_BALL, MOVE_SCARY_FACE);
+        }
+        OPPONENT(SPECIES_IRON_VALIANT){
+            Level(59);
+            Speed(10);
+            Item(ITEM_BOOSTER_ENERGY);
+            Nature(NATURE_JOLLY);
+            Moves(MOVE_LIQUIDATION, MOVE_AQUA_TAIL);
+        }
+    } WHEN {
+        TURN{
+            MOVE(player, MOVE_SCARY_FACE);
+            EXPECT_MOVE(opponent, MOVE_LIQUIDATION);
         }
     }
 }

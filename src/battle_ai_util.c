@@ -961,11 +961,11 @@ static bool32 AI_IsMoveEffectInPlus(u32 battlerAtk, u32 battlerDef, u32 move, s3
                         return TRUE;
                     break;
                 case MOVE_EFFECT_ATK_MINUS_1:
-                    if (ShouldLowerStat(battlerDef, abilityDef, STAT_ATK + (gMovesInfo[move].additionalEffects[i].moveEffect - MOVE_EFFECT_ATK_MINUS_1)) && noOfHitsToKo != 1 && HasMoveWithCategory(battlerDef, DAMAGE_CATEGORY_PHYSICAL))
+                    if (ShouldLowerStat(battlerDef, abilityDef, STAT_ATK) && noOfHitsToKo > 1 && HasMoveWithCategory(battlerDef, DAMAGE_CATEGORY_PHYSICAL))
                         return TRUE;
                     break;
                 case MOVE_EFFECT_SP_ATK_MINUS_1:
-                    if (ShouldLowerStat(battlerDef, abilityDef, STAT_ATK + (gMovesInfo[move].additionalEffects[i].moveEffect - MOVE_EFFECT_ATK_MINUS_1)) && noOfHitsToKo != 1 && HasMoveWithCategory(battlerDef, DAMAGE_CATEGORY_SPECIAL))
+                    if (ShouldLowerStat(battlerDef, abilityDef, STAT_SPATK) && noOfHitsToKo > 1 && HasMoveWithCategory(battlerDef, DAMAGE_CATEGORY_SPECIAL))
                         return TRUE;
                     break;
                 case MOVE_EFFECT_DEF_MINUS_1:
@@ -973,15 +973,15 @@ static bool32 AI_IsMoveEffectInPlus(u32 battlerAtk, u32 battlerDef, u32 move, s3
                 case MOVE_EFFECT_SP_DEF_MINUS_1:
                 case MOVE_EFFECT_ACC_MINUS_1:
                 case MOVE_EFFECT_EVS_MINUS_1:
-                    if (ShouldLowerStat(battlerDef, abilityDef, STAT_ATK + (gMovesInfo[move].additionalEffects[i].moveEffect - MOVE_EFFECT_ATK_MINUS_1)) && noOfHitsToKo != 1)
+                    if (ShouldLowerStat(battlerDef, abilityDef, GetStatBeingLoweredFromMoveEffect(gMovesInfo[move].additionalEffects[i].moveEffect)) && noOfHitsToKo > 1)
                         return TRUE;
                     break;
                 case MOVE_EFFECT_ATK_MINUS_2:
-                    if (ShouldLowerStat(battlerDef, abilityDef, STAT_ATK + (gMovesInfo[move].additionalEffects[i].moveEffect - MOVE_EFFECT_ATK_MINUS_2)) && noOfHitsToKo != 1 && HasMoveWithCategory(battlerDef, DAMAGE_CATEGORY_PHYSICAL))
+                    if (ShouldLowerStat(battlerDef, abilityDef, STAT_ATK) && noOfHitsToKo > 1 && HasMoveWithCategory(battlerDef, DAMAGE_CATEGORY_PHYSICAL))
                         return TRUE;
                     break;
                 case MOVE_EFFECT_SP_ATK_MINUS_2:
-                    if (ShouldLowerStat(battlerDef, abilityDef, STAT_ATK + (gMovesInfo[move].additionalEffects[i].moveEffect - MOVE_EFFECT_ATK_MINUS_2)) && noOfHitsToKo != 1 && HasMoveWithCategory(battlerDef, DAMAGE_CATEGORY_SPECIAL))
+                    if (ShouldLowerStat(battlerDef, abilityDef, STAT_SPATK) && noOfHitsToKo > 1 && HasMoveWithCategory(battlerDef, DAMAGE_CATEGORY_SPECIAL))
                         return TRUE;
                     break;
                 case MOVE_EFFECT_DEF_MINUS_2:
@@ -989,7 +989,7 @@ static bool32 AI_IsMoveEffectInPlus(u32 battlerAtk, u32 battlerDef, u32 move, s3
                 case MOVE_EFFECT_SP_DEF_MINUS_2:
                 case MOVE_EFFECT_ACC_MINUS_2:
                 case MOVE_EFFECT_EVS_MINUS_2:
-                    if (ShouldLowerStat(battlerDef, abilityDef, STAT_ATK + (gMovesInfo[move].additionalEffects[i].moveEffect - MOVE_EFFECT_ATK_MINUS_2)) && noOfHitsToKo != 1)
+                    if (ShouldLowerStat(battlerDef, abilityDef, GetStatBeingLoweredFromMoveEffect(gMovesInfo[move].additionalEffects[i].moveEffect)) && noOfHitsToKo > 1)
                         return TRUE;
                     break;
             }

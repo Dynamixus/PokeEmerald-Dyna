@@ -3397,7 +3397,7 @@ static void AI_CompareDamagingMoves(u32 battlerAtk, u32 battlerDef)
     }
 }
 
-static u32 GetStatBeingLoweredFromMoveEffect(u32 statChange)
+u32 GetStatBeingLoweredFromMoveEffect(u32 statChange)
 {
     switch(statChange)
     {
