@@ -4802,12 +4802,12 @@ static u32 AI_CalcMoveEffectScore(u32 battlerAtk, u32 battlerDef, u32 move)
                         break;
                 case MOVE_EFFECT_ATK_MINUS_1:
                 case MOVE_EFFECT_ATK_MINUS_2:
-                    if (ShouldLowerStat(battlerDef, aiData->abilities[battlerDef], GetStatBeingLoweredFromMoveEffect(gMovesInfo[move].additionalEffects[i].moveEffect)) && HasMoveWithCategory(battlerDef, DAMAGE_CATEGORY_PHYSICAL))
+                    if (ShouldLowerStat(battlerDef, aiData->abilities[battlerDef], STAT_ATK) && HasMoveWithCategory(battlerDef, DAMAGE_CATEGORY_PHYSICAL))
                         ADJUST_SCORE(DECENT_EFFECT);
                     break;
                 case MOVE_EFFECT_SP_ATK_MINUS_1:
                 case MOVE_EFFECT_SP_ATK_MINUS_2:
-                    if (ShouldLowerStat(battlerDef, aiData->abilities[battlerDef], GetStatBeingLoweredFromMoveEffect(gMovesInfo[move].additionalEffects[i].moveEffect)) && HasMoveWithCategory(battlerDef, DAMAGE_CATEGORY_SPECIAL))
+                    if (ShouldLowerStat(battlerDef, aiData->abilities[battlerDef], STAT_SPATK) && HasMoveWithCategory(battlerDef, DAMAGE_CATEGORY_SPECIAL))
                         ADJUST_SCORE(DECENT_EFFECT);
                     break;
                 case MOVE_EFFECT_DEF_MINUS_1:
