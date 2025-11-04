@@ -548,6 +548,17 @@ bool32 IsDamageMoveUnusable(u32 battlerAtk, u32 battlerDef, u32 move, u32 moveTy
     return FALSE;
 }
 
+bool32 IsAdditionalEffectBlocked(u32 battlerAtk, u32 abilityAtk, u32 battlerDef, u32 abilityDef)
+{
+    if (AI_DATA->holdEffects[battlerDef] == HOLD_EFFECT_COVERT_CLOAK)
+        return TRUE;
+
+    if (abilityDef == ABILITY_SHIELD_DUST && !IsMoldBreakerTypeAbility(battlerAtk, abilityAtk))
+        return TRUE;
+
+    return FALSE;
+}
+
 static inline s32 GetDamageByRollType(s32 dmg, enum DamageRollType rollType)
 {
     if (rollType == DMG_ROLL_LOWEST)
@@ -933,6 +944,9 @@ static bool32 AI_IsMoveEffectInPlus(u32 battlerAtk, u32 battlerDef, u32 move, s3
         }
         else // consider move effects that hinder the target
         {
+            if (IsAdditionalEffectBlocked(battlerAtk, abilityAtk, battlerDef, abilityDef))
+                continue;
+
             switch (gMovesInfo[move].additionalEffects[i].moveEffect)
             {
                 case MOVE_EFFECT_POISON:
@@ -1035,8 +1049,8 @@ static bool32 AI_IsMoveEffectInMinus(u32 battlerAtk, u32 battlerDef, u32 move, s
                     case MOVE_EFFECT_ATK_DEF_DOWN:
                     case MOVE_EFFECT_DEF_SPDEF_DOWN:
                         if ((gMovesInfo[move].additionalEffects[i].self && abilityAtk != ABILITY_CONTRARY && abilityAtk != ABILITY_BAD_COMPANY)
-                            || (noOfHitsToKo != 1 && abilityDef == ABILITY_CONTRARY && !DoesBattlerIgnoreAbilityChecks(abilityAtk, move)))
-                            return TRUE;
+                            || (noOfHitsToKo != 1 && !gMovesInfo[move].additionalEffects[i].self && abilityDef == ABILITY_CONTRARY && !DoesBattlerIgnoreAbilityChecks(abilityAtk, move)))
+                                return TRUE;
                         break;
                     case MOVE_EFFECT_RECHARGE:
                         return gMovesInfo[move].additionalEffects[i].self;
@@ -1056,8 +1070,8 @@ static bool32 AI_IsMoveEffectInMinus(u32 battlerAtk, u32 battlerDef, u32 move, s
                     case MOVE_EFFECT_ACC_PLUS_2:
                     case MOVE_EFFECT_ALL_STATS_UP:
                         if ((gMovesInfo[move].additionalEffects[i].self && abilityAtk == ABILITY_CONTRARY)
-                            || (noOfHitsToKo != 1 && !(abilityDef == ABILITY_CONTRARY && !DoesBattlerIgnoreAbilityChecks(abilityAtk, move))))
-                            return TRUE;
+                            || (noOfHitsToKo != 1 && !gMovesInfo[move].additionalEffects[i].self && !(abilityDef == ABILITY_CONTRARY && !DoesBattlerIgnoreAbilityChecks(abilityAtk, move))))
+                                return TRUE;
                         break;
                 }
             }
