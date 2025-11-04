@@ -497,7 +497,7 @@ static u32 ChooseMoveOrAction_Singles(u32 battlerAi)
     s32 i;
     u32 flags = AI_THINKING_STRUCT->aiFlags[battlerAi];
     u32 opposingBattler = GetBattlerAtPosition(BATTLE_OPPOSITE(GetBattlerPosition(battlerAi)));
-    AI_DATA->shouldConsiderExpolsion = AI_RandLessThan(GetAIExplosionChanceFromHP(AI_DATA->hpPercents[battlerAi]));
+    AI_DATA->shouldConsiderExplosion = AI_RandLessThan(GetAIExplosionChanceFromHP(AI_DATA->hpPercents[battlerAi]));
 
     AI_THINKING_STRUCT->aiLogicId = 0;
     AI_THINKING_STRUCT->movesetIndex = 0;
@@ -995,7 +995,7 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
                 ADJUST_SCORE(-20);
             break;
         case EFFECT_EXPLOSION:
-            if(!aiData->shouldConsiderExpolsion)
+            if(!aiData->shouldConsiderExplosion)
             {
                 ADJUST_SCORE(-10);
             }
@@ -2634,7 +2634,7 @@ static s32 AI_TryToFaint(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
     // we get a random number based on the remaining HP of the AI attacker
     bool8 canIgnoreExplosionEffect = ((gMovesInfo[move].effect != EFFECT_EXPLOSION)
                                     || (gMovesInfo[move].effect == EFFECT_EXPLOSION
-                                        && AI_DATA->shouldConsiderExpolsion));
+                                        && AI_DATA->shouldConsiderExplosion));
 
     if (CanIndexMoveFaintTarget(battlerAtk, battlerDef, movesetIndex, AI_ATTACKING_ON_FIELD) && canIgnoreExplosionEffect)
     {
@@ -3217,7 +3217,7 @@ static void AI_CompareDamagingMoves(u32 battlerAtk, u32 battlerDef)
                     tempMoveScores[i] = 0;
                     isTwoTurnNotSemiInvulnerableMove[i] = FALSE;
                 }
-                else if (gMovesInfo[moves[i]].effect == EFFECT_EXPLOSION && AI_DATA->shouldConsiderExpolsion == FALSE){
+                else if (gMovesInfo[moves[i]].effect == EFFECT_EXPLOSION && AI_DATA->shouldConsiderExplosion == FALSE){
                     noOfHits[i] = -1;
                     tempMoveScores[i] = 0;
                 }
@@ -3397,7 +3397,7 @@ static void AI_CompareDamagingMoves(u32 battlerAtk, u32 battlerDef)
     }
 }
 
-static u32 GetStatBeingLoweredFromMoveEffect(u32 statChange)
+u32 GetStatBeingLoweredFromMoveEffect(u32 statChange)
 {
     switch(statChange)
     {
@@ -4801,14 +4801,20 @@ static u32 AI_CalcMoveEffectScore(u32 battlerAtk, u32 battlerDef, u32 move)
                     if (!ShouldLowerSpeed(battlerAtk, battlerDef, aiData->abilities[battlerDef]))
                         break;
                 case MOVE_EFFECT_ATK_MINUS_1:
-                case MOVE_EFFECT_DEF_MINUS_1:
+                case MOVE_EFFECT_ATK_MINUS_2:
+                    if (ShouldLowerStat(battlerDef, aiData->abilities[battlerDef], STAT_ATK) && HasMoveWithCategory(battlerDef, DAMAGE_CATEGORY_PHYSICAL))
+                        ADJUST_SCORE(DECENT_EFFECT);
+                    break;
                 case MOVE_EFFECT_SP_ATK_MINUS_1:
+                case MOVE_EFFECT_SP_ATK_MINUS_2:
+                    if (ShouldLowerStat(battlerDef, aiData->abilities[battlerDef], STAT_SPATK) && HasMoveWithCategory(battlerDef, DAMAGE_CATEGORY_SPECIAL))
+                        ADJUST_SCORE(DECENT_EFFECT);
+                    break;
+                case MOVE_EFFECT_DEF_MINUS_1:
                 case MOVE_EFFECT_SP_DEF_MINUS_1:
                 case MOVE_EFFECT_ACC_MINUS_1:
                 case MOVE_EFFECT_EVS_MINUS_1:
-                case MOVE_EFFECT_ATK_MINUS_2:
                 case MOVE_EFFECT_DEF_MINUS_2:
-                case MOVE_EFFECT_SP_ATK_MINUS_2:
                 case MOVE_EFFECT_SP_DEF_MINUS_2:
                 case MOVE_EFFECT_ACC_MINUS_2:
                 case MOVE_EFFECT_EVS_MINUS_2:
