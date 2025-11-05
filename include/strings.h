@@ -294,6 +294,7 @@ extern const u8 gText_HPBarSpeedFast[];
 extern const u8 gText_HPBars[];
 extern const u8 gText_RToRun[];
 extern const u8 gText_NatureOrder[];
+extern const u8 gText_MusicOption[];
 extern const u8 gText_NatureOrderAlphabetical[];
 extern const u8 gText_NatureOrderStat[];
 extern const u8 gText_NatureOrderFreq[];

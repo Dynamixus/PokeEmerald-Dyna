@@ -18,6 +18,8 @@
 #include "constants/game_settings.h"
 #include "constants/rgb.h"
 #include "string_util.h"
+#include "sound.h"
+#include "m4a.h"
 
 #define tMenuSelection data[0]
 #define tTextSpeed data[1]
@@ -30,6 +32,7 @@
 #define tHPBarSpeed data[8]
 #define tRToRun data[9]
 #define tNatureOrder data[10]
+#define tMusic data[11]
 
 
 // Page 1
@@ -53,6 +56,7 @@ enum
     MENUITEM_HP_BARS,
     MENUITEM_R_TO_RUN,
     MENUITEM_NATURE_ORDER,
+    MENUITEM_MUSIC,
     MENUITEM_CANCEL_PG2,
     MENUITEM_COUNT_PG2,
 };
@@ -76,6 +80,7 @@ enum
 #define YPOS_HPBARSPEED       (MENUITEM_HP_BARS * 16)
 #define YPOS_RTORUN           (MENUITEM_R_TO_RUN * 16)
 #define YPOS_NATURE_ORDER     (MENUITEM_NATURE_ORDER * 16)
+#define YPOS_MUSIC            (MENUITEM_MUSIC * 16)
 
 #define PAGE_COUNT 2
 
@@ -106,6 +111,8 @@ static u8   RToRun_ProcessInput(u8 selection);
 static void RToRun_DrawChoices(u8 selection);
 static u8   NatureOrder_ProcessInput(u8 selection);
 static void NatureOrder_DrawChoices(u8 selection);
+static u8 Music_ProcessInput(u8 selection);
+static void Music_DrawChoices(u8 selection);
 static void DrawHeaderText(void);
 static void DrawOptionMenuTexts(void);
 static void DrawBgWindowFrames(void);
@@ -134,6 +141,7 @@ static const u8 *const sOptionMenuItemsNames_Pg2[MENUITEM_COUNT_PG2] =
     [MENUITEM_HP_BARS]         = gText_HPBars,
     [MENUITEM_R_TO_RUN]        = gText_RToRun,
     [MENUITEM_NATURE_ORDER]    = gText_NatureOrder,
+    [MENUITEM_MUSIC]           = gText_MusicOption,
     [MENUITEM_CANCEL_PG2]      = gText_OptionMenuCancel,
 };
 
@@ -212,6 +220,7 @@ static void ReadAllCurrentSettings(u8 taskId)
     gTasks[taskId].tHPBarSpeed = VarGet(VAR_HP_BAR_SPEED);
     gTasks[taskId].tRToRun = FlagGet(FLAG_DISABLE_R_TO_RUN);
     gTasks[taskId].tNatureOrder = VarGet(VAR_NATURE_ORDER);
+    gTasks[taskId].tMusic = FlagGet(FLAG_DISABLE_MUSIC);
 }
 
 static void DrawOptionsPg1(u8 taskId)
@@ -234,6 +243,7 @@ static void DrawOptionsPg2(u8 taskId)
     HPBarSpeed_DrawChoices(gTasks[taskId].tHPBarSpeed);
     RToRun_DrawChoices(gTasks[taskId].tRToRun);
     NatureOrder_DrawChoices(gTasks[taskId].tNatureOrder);
+    Music_DrawChoices(gTasks[taskId].tMusic);
     HighlightOptionMenuItem(gTasks[taskId].tMenuSelection);
     CopyWindowToVram(WIN_OPTIONS, COPYWIN_FULL);
 }
@@ -547,6 +557,13 @@ static void Task_OptionMenuProcessInput_Pg2(u8 taskId)
             if (previousOption != gTasks[taskId].tNatureOrder)
                 NatureOrder_DrawChoices(gTasks[taskId].tNatureOrder);
             break;
+        case MENUITEM_MUSIC:
+            previousOption = gTasks[taskId].tMusic;
+            gTasks[taskId].tMusic = Music_ProcessInput(gTasks[taskId].tMusic);
+
+            if (previousOption != gTasks[taskId].tMusic)
+                Music_DrawChoices(gTasks[taskId].tMusic);
+            break;
         default:
             return;
         }
@@ -570,6 +587,11 @@ static void Task_OptionMenuSave(u8 taskId)
     VarSet(VAR_HP_BAR_SPEED, gTasks[taskId].tHPBarSpeed);
     VarSet(VAR_NATURE_ORDER, gTasks[taskId].tNatureOrder);
     BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+
+    if (FlagGet(FLAG_DISABLE_MUSIC) || 
+    gMPlayInfo_BGM.songHeader == gSongTable[0].header)
+        PlayBGM(GetCurrentMapMusic());
+
     gTasks[taskId].func = Task_OptionMenuFadeOut;
 }
 
@@ -675,6 +697,17 @@ static u8 NatureOrder_ProcessInput(u8 selection)
     return selection;
 }
 
+static u8 Music_ProcessInput(u8 selection)
+{
+    if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
+    {
+        selection ^= 1;
+        sArrowPressed = TRUE;
+        // Update the Music Option Flag
+        FlagToggle(FLAG_DISABLE_MUSIC);
+    }
+    return selection;
+}
 
 static void BattleSpeed_DrawChoices(u8 selection)
 {
@@ -738,6 +771,18 @@ static void NatureOrder_DrawChoices(u8 selection)
     xStat = 104 + widthAlpha + gap;
     DrawOptionMenuChoice(gText_NatureOrderStat, xStat, YPOS_NATURE_ORDER, styles[1]);
     DrawOptionMenuChoice(gText_NatureOrderFreq, GetStringRightAlignXOffset(FONT_NORMAL, gText_NatureOrderFreq, 198), YPOS_NATURE_ORDER, styles[2]);
+}
+
+static void Music_DrawChoices(u8 selection)
+{
+    u8 styles[2];
+
+    styles[0] = 0;
+    styles[1] = 0;
+    styles[selection] = 1;
+
+    DrawOptionMenuChoice(gText_BattleSceneOn, 104, YPOS_MUSIC, styles[0]);
+    DrawOptionMenuChoice(gText_BattleSceneOff, GetStringRightAlignXOffset(FONT_NORMAL, gText_BattleSceneOff, 198), YPOS_MUSIC, styles[1]);
 }
 
 
