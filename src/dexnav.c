@@ -1889,11 +1889,14 @@ static bool8 SpeciesInArray(u16 species, u8 section)
         {
             if (isRegionalForm)
             {
-                return sDexNavUiDataPtr->landSpecies[i] == species;
+                if (SanitizeSpeciesId(sDexNavUiDataPtr->landSpecies[i]) == species)
+                    return TRUE;  
+                
             }
 
             else if (SpeciesToNationalPokedexNum(sDexNavUiDataPtr->landSpecies[i]) == dexNum)
-                return TRUE;
+
+                    return TRUE;
         }
         break;
     case 1: //water
@@ -1901,7 +1904,9 @@ static bool8 SpeciesInArray(u16 species, u8 section)
         {
             if (isRegionalForm)
             {
-                return sDexNavUiDataPtr->waterSpecies[i] == species;
+                if (SanitizeSpeciesId(sDexNavUiDataPtr->waterSpecies[i]) == species)
+                    return TRUE;  
+                
             }
             if (SpeciesToNationalPokedexNum(sDexNavUiDataPtr->waterSpecies[i]) == dexNum)
                 return TRUE;
@@ -1912,7 +1917,9 @@ static bool8 SpeciesInArray(u16 species, u8 section)
         {
             if (isRegionalForm)
             {
-                return sDexNavUiDataPtr->hiddenSpecies[i] == species;
+                if (SanitizeSpeciesId(sDexNavUiDataPtr->hiddenSpecies[i]) == species)
+                return TRUE;  
+                
             }
 
             if (SpeciesToNationalPokedexNum(sDexNavUiDataPtr->hiddenSpecies[i]) == dexNum)

@@ -1173,6 +1173,24 @@ static void HallOfFame_PrintWelcomeText(u8 unusedPossiblyWindowId, u8 unused2)
         else
             AddTextPrinterParameterized3(0, FONT_NORMAL, GetStringCenterAlignXOffset(FONT_NORMAL, gText_WelcomeToHOFNormalNoMGM, 0xD0), 1, sMonInfoTextColors, 0, gText_WelcomeToHOFNormalNoMGM);
     }
+    else if(VarGet(VAR_GAME_SETTING_DIFFICULTY_MODE) == GAME_SETTING_DIFFICULTY_HARD_MODE)
+    {
+        if(FlagGet(FLAG_MIN_GRINDING_MODE))
+            AddTextPrinterParameterized3(0, FONT_NORMAL, GetStringCenterAlignXOffset(FONT_NORMAL, gText_WelcomeToHOFHardNoMGM, 0xD0), 1, sMonInfoTextColors, 0, gText_WelcomeToHOFHardNoMGM);
+        else
+            AddTextPrinterParameterized3(0, FONT_NORMAL, GetStringCenterAlignXOffset(FONT_NORMAL, gText_WelcomeToHOFHardNoMGM, 0xD0), 1, sMonInfoTextColors, 0, gText_WelcomeToHOFHardNoMGM);
+    }
+    else if(VarGet(VAR_GAME_SETTING_DIFFICULTY_MODE) == GAME_SETTING_DIFFICULTY_VANILLA_MODE)
+    {
+        if(FlagGet(FLAG_MIN_GRINDING_MODE))
+            AddTextPrinterParameterized3(0, FONT_NORMAL, GetStringCenterAlignXOffset(FONT_NORMAL, gText_WelcomeToHOFVanillaMGM, 0xD0), 1, sMonInfoTextColors, 0, gText_WelcomeToHOFVanillaMGM);
+        else
+            AddTextPrinterParameterized3(0, FONT_NORMAL, GetStringCenterAlignXOffset(FONT_NORMAL, gText_WelcomeToHOFVanillaNoMGM, 0xD0), 1, sMonInfoTextColors, 0, gText_WelcomeToHOFVanillaNoMGM);
+    }
+    else if(VarGet(VAR_GAME_SETTING_DIFFICULTY_MODE) == GAME_SETTING_DIFFICULTY_HOF_MODE)
+    {
+        AddTextPrinterParameterized3(0, FONT_NORMAL, GetStringCenterAlignXOffset(FONT_NORMAL, gText_WelcomeToHOFHOF, 0xD0), 1, sMonInfoTextColors, 0, gText_WelcomeToHOFHOF);
+    }
     else
     {
         AddTextPrinterParameterized3(0, FONT_NORMAL, GetStringCenterAlignXOffset(FONT_NORMAL, gText_WelcomeToHOF, 0xD0), 1, sMonInfoTextColors, 0, gText_WelcomeToHOF);
