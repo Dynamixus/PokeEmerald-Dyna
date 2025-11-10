@@ -1228,9 +1228,9 @@ s32 AI_WhoStrikesFirst(u32 battlerAI, u32 battler, u32 aiMoveConsidered, u32 pla
 
 bool32 CanEndureHit(u32 battler, u32 battlerTarget, u32 move)
 {
-    if (!BATTLER_MAX_HP(battlerTarget) || gMovesInfo[move].effect == EFFECT_MULTI_HIT || gBattleMons[battler].ability == ABILITY_PARENTAL_BOND)
+    if (!BATTLER_MAX_HP(battlerTarget) || gMovesInfo[move].effect == EFFECT_MULTI_HIT || AI_GetBattlerAbility(battler) == ABILITY_PARENTAL_BOND)
         return FALSE;
-    if (gMovesInfo[move].punchingMove && gBattleMons[battler].ability == ABILITY_ORAORAORAORA)
+    if (gMovesInfo[move].punchingMove && AI_GetBattlerAbility(battler) == ABILITY_ORAORAORAORA)
         return FALSE;
     if (gMovesInfo[move].strikeCount > 1 && !(gMovesInfo[move].effect == EFFECT_DRAGON_DARTS && IsValidDoubleBattle(battlerTarget)))
         return FALSE;
