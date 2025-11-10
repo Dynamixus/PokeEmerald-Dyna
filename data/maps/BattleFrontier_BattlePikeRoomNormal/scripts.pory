@@ -780,6 +780,7 @@ BattleFrontier_BattlePikeRoomNormal_Text_HopeYouDidntUseUpLuck:
 
 BattleFrontier_BattlePikeRoomNormal_Text_LucyShowMeFrontierPass:
 	.string "LUCY: … … … … … …\n"
+	.string "So you are {PLAYER}…\p"
 	.string "Show me your FRONTIER PASS…$"
 
 BattleFrontier_BattlePikeRoomNormal_Text_ReceivedLuckSymbol:
@@ -798,7 +799,9 @@ BattleFrontier_BattlePikeRoomNormal_Text_LucyYouAgain:
 	.string "I don't feel any compulsion to keep\n"
 	.string "losing to the same opponent…\p"
 	.string "… … … … … …\n"
-	.string "Fine… I'll do it…$"
+	.string "Fine… I'll do it…\p"
+	.string "Last time I used my favorites…\n"
+	.string "But this time I'm not holding back…$"
 
 BattleFrontier_BattlePikeRoomNormal_Text_NowComeOn:
 	.string "Now!\n"

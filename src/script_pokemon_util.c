@@ -365,6 +365,58 @@ void ChoosePartyForBattleFrontier(void)
     InitChooseHalfPartyForBattle(gSpecialVar_0x8004 + 1);
 }
 
+void ChoosePartyForBattleFrontier6V6(void)
+{
+    int i;
+    s32 facility = VarGet(VAR_FRONTIER_FACILITY);
+
+    if (gPlayerPartyCount < FRONTIER_PARTY_SIZE_FULL)
+    {
+        gSpecialVar_Result = FALSE;
+        SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+        return;
+    }
+
+    for (i = 0; i < gPlayerPartyCount; i++)
+    {
+        u16 species = GetMonData(&gPlayerParty[i], MON_DATA_SPECIES);
+        if (species == SPECIES_EGG || species == SPECIES_NONE)
+        {
+            gSpecialVar_Result = FALSE;
+            SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+            return;
+        } else if (gSpeciesInfo[species].isFrontierBanned)
+        {
+            gSpecialVar_Result = FALSE;
+            SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+            return;
+        } 
+        // Check for duplicate species
+        for (int j = i + 1; j < gPlayerPartyCount; j++)
+        {
+            u16 otherSpecies = GetMonData(&gPlayerParty[j], MON_DATA_SPECIES);
+            if (otherSpecies == species)
+            {
+                gSpecialVar_Result = FALSE;
+                SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+                return;
+            }
+        }
+        if (facility == FRONTIER_FACILITY_PYRAMID)
+        {
+            if (GetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM) != ITEM_NONE)
+            {
+                gSpecialVar_Result = FALSE;
+                SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+                return;
+            }
+        }
+    }
+    
+    gSpecialVar_Result = TRUE;
+    SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+}
+
 static void CB2_ReturnFromChooseBattleFrontierParty(void)
 {
     switch (gSelectedOrderFromParty[0])
@@ -398,6 +450,12 @@ void ReducePlayerPartyToSelectedMons(void)
     for (i = 0; i < MAX_FRONTIER_PARTY_SIZE; i++)
         gPlayerParty[i] = party[i];
 
+    CalculatePlayerPartyCount();
+}
+
+void ReducePlayerPartyToSelectedMons6V6(void)
+{
+    // For Battle Tower 6v6, keep the full party as-is
     CalculatePlayerPartyCount();
 }
 

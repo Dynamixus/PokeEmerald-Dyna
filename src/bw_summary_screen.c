@@ -5062,7 +5062,7 @@ static void SetMoveTypeIcons(void)
         {
             type = gMovesInfo[summary->moves[i]].type;
             if (P_SHOW_DYNAMIC_TYPES)
-                type = CheckDynamicMoveType(mon, summary->moves[i], 0);
+                type = CheckDynamicMoveType(mon, summary->moves[i], 0, gMain.inBattle);
             SetTypeSpritePosAndPal(type, 8, 16 + (i * 28), i + SPRITE_ARR_ID_TYPE);
         }
             
@@ -5090,7 +5090,7 @@ static void SetNewMoveTypeIcon(void)
     struct Pokemon *mon = &sMonSummaryScreen->currentMon;
 
     if (P_SHOW_DYNAMIC_TYPES)
-        type = CheckDynamicMoveType(mon, sMonSummaryScreen->newMove, 0);
+        type = CheckDynamicMoveType(mon, sMonSummaryScreen->newMove, 0, gMain.inBattle);
 
     if (sMonSummaryScreen->newMove == MOVE_NONE)
     {

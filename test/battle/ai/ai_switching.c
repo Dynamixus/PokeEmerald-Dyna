@@ -39,6 +39,66 @@ AI_SINGLE_BATTLE_TEST("AI switches if Perish Song is about to kill")
     }
 }
 
+AI_SINGLE_BATTLE_TEST("AI sees on-field player ability correctly and does not see previous Pokémon's ability after player uses a pivot move when choosing a post-KO switch")
+{
+    u32 testAbility;
+    PARAMETRIZE { testAbility = ABILITY_SHEER_FORCE; }
+    PARAMETRIZE { testAbility = ABILITY_ICE_SCALES; }
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_TRY_TO_FAINT | AI_FLAG_CHECK_VIABILITY | AI_FLAG_SMART_SWITCHING | AI_FLAG_SMART_MON_CHOICES | AI_FLAG_OMNISCIENT);
+        PLAYER(SPECIES_DEWGONG) {Level(47); HP(91); Moves(MOVE_SCALD, MOVE_REST, MOVE_FLIP_TURN, MOVE_AQUA_JET); Ability(ABILITY_ICE_SCALES); Item(ITEM_LEFTOVERS); Nature(NATURE_SASSY);};
+        PLAYER(SPECIES_NIDOQUEEN) {Level(47); Moves(MOVE_ROCK_TOMB, MOVE_EARTH_POWER, MOVE_SLUDGE_BOMB, MOVE_SUPERPOWER); Ability(testAbility); Item(ITEM_SITRUS_BERRY); Nature(NATURE_MODEST); };
+        OPPONENT(SPECIES_NINETALES) {Level(47); HP(1); Moves(MOVE_ENERGY_BALL); Item(ITEM_HEAT_ROCK); Ability(ABILITY_BATTLE_ARMOR); Nature(NATURE_TIMID); }
+        OPPONENT(SPECIES_WALKING_WAKE) {Level(47); Moves(MOVE_HYDRO_STEAM, MOVE_FLAMETHROWER, MOVE_DRAGON_PULSE, MOVE_SLUDGE); Item(ITEM_CHOICE_SCARF); Ability(ABILITY_PROTOSYNTHESIS); Nature(NATURE_TIMID); }
+        OPPONENT(SPECIES_MAROWAK_ALOLA) {Level(47); Moves(MOVE_FLARE_BLITZ, MOVE_SHADOW_BONE, MOVE_BONEMERANG, MOVE_THUNDER_PUNCH); Item(ITEM_THICK_CLUB); Ability(ABILITY_BONE_ZONE); Nature(NATURE_ADAMANT); }
+    } WHEN {
+        TURN { 
+            MOVE(player, MOVE_FLIP_TURN);
+            SEND_OUT(player, 1);
+            EXPECT_MOVE(opponent, MOVE_ENERGY_BALL);
+            testAbility == ABILITY_ICE_SCALES ? EXPECT_SEND_OUT(opponent, 2) : EXPECT_SEND_OUT(opponent, 1);
+        }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("AI sees on-field player ability correctly and does not see previous Pokémon's ability after player uses a pivot move when choosing a mid-battle switch")
+{
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_TRY_TO_FAINT | AI_FLAG_CHECK_VIABILITY | AI_FLAG_SMART_SWITCHING | AI_FLAG_SMART_MON_CHOICES | AI_FLAG_OMNISCIENT);
+        PLAYER(SPECIES_PIKACHU) {
+            Level(44);
+            Moves(MOVE_VOLT_SWITCH, MOVE_SPARKLY_SWIRL);
+            Ability(ABILITY_LIGHTNING_ROD);
+            Nature(NATURE_TIMID);
+        };
+        PLAYER(SPECIES_GYARADOS) {
+            Level(44);
+            Moves(MOVE_CRUNCH, MOVE_ROCK_THROW);
+        };
+        OPPONENT(SPECIES_GOLBAT) {
+            Level(44);
+            Moves(MOVE_U_TURN);
+            Nature(NATURE_ADAMANT);
+        }
+        OPPONENT(SPECIES_PIDGEOT_MEGA) {
+            Level(44);
+            Moves(MOVE_HURRICANE);
+            Nature(NATURE_MODEST);
+        }
+        OPPONENT(SPECIES_REGIELEKI) {
+            Level(44);
+            Moves(MOVE_THUNDERBOLT);
+        }
+    } WHEN {
+        TURN { 
+            MOVE(player, MOVE_VOLT_SWITCH);
+            SEND_OUT(player, 1);
+            EXPECT_MOVE(opponent, MOVE_U_TURN);
+            EXPECT_SEND_OUT(opponent, 2);
+        }
+    }
+}
+
 AI_DOUBLE_BATTLE_TEST("AI will not try to switch for the same pokemon for 2 spots in a double battle (all bad moves)")
 {
     u32 flags;
@@ -390,6 +450,55 @@ AI_SINGLE_BATTLE_TEST("AI_FLAG_SMART_MON_CHOICES: Mid-battle switches prioritize
             TURN { MOVE(player, MOVE_WING_ATTACK); EXPECT_SWITCH(opponent, 2); }
     }
 }
+
+AI_SINGLE_BATTLE_TEST("AI_FLAG_SMART_MON_CHOICES: Eject Button will send out Ace Mon if it's the only one remaining")
+{
+    u32 aiSmartMonChoicesFlag;
+    PARAMETRIZE { aiSmartMonChoicesFlag = 0; }
+    PARAMETRIZE { aiSmartMonChoicesFlag = AI_FLAG_SMART_MON_CHOICES; }
+    GIVEN {
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT | aiSmartMonChoicesFlag | AI_FLAG_ACE_POKEMON);
+        PLAYER(SPECIES_ZIGZAGOON) { Moves(MOVE_SCRATCH); }
+        OPPONENT(SPECIES_ZIGZAGOON) { Item(ITEM_EJECT_BUTTON); };
+        OPPONENT(SPECIES_LINOONE);
+    } WHEN {
+        TURN { MOVE(player, MOVE_SCRATCH); EXPECT_MOVE(opponent, MOVE_SCRATCH); EXPECT_SEND_OUT(opponent, 1); }
+    }
+}
+
+// hits a timeout case but the .elf file does work
+// AI_SINGLE_BATTLE_TEST("AI_FLAG_SMART_MON_CHOICES: AI will consider mega ability for post ko switch in")
+// {
+//     GIVEN {
+//         AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_TRY_TO_FAINT | AI_FLAG_CHECK_VIABILITY | AI_FLAG_SMART_SWITCHING | AI_FLAG_SMART_MON_CHOICES | AI_FLAG_OMNISCIENT);
+//         PLAYER(SPECIES_GALLADE) {
+//             Level(85);
+//             Moves(MOVE_SACRED_SWORD);
+//             Item(ITEM_GALLADITE);
+//         }
+//         OPPONENT(SPECIES_WOBBUFFET) {Level(1); HP(1); Moves(MOVE_TACKLE); }
+//         OPPONENT(SPECIES_GRIMMSNARL) {
+//             Level(85);
+//             Moves(MOVE_SPIRIT_BREAK, MOVE_DARKEST_LARIAT, MOVE_HAMMER_ARM, MOVE_PARTING_SHOT);
+//             Nature(NATURE_JOLLY);
+//             Ability(ABILITY_PRANKSTER);
+//             Item(ITEM_LEFTOVERS);
+//         }
+//         OPPONENT(SPECIES_ROARING_MOON) {
+//             Level(85);
+//             Moves(MOVE_DRAGON_DANCE, MOVE_IRON_HEAD, MOVE_DRAGON_CLAW, MOVE_KNOCK_OFF);
+//             Nature(NATURE_ADAMANT);
+//             Ability(ABILITY_PROTOSYNTHESIS);
+//             Item(ITEM_BOOSTER_ENERGY); 
+//         }
+//     } WHEN {
+//         TURN { 
+//             MOVE(player, MOVE_SACRED_SWORD, gimmick: GIMMICK_MEGA);
+//             EXPECT_MOVE(opponent, MOVE_TACKLE);
+//             EXPECT_SEND_OUT(opponent, 2); // grimmsnarl damageMonId otherwise
+//         }
+//     }
+// }
 
 AI_SINGLE_BATTLE_TEST("AI_FLAG_SMART_MON_CHOICES: Post-KO switches prioritize offensive options")
 {

@@ -109,3 +109,65 @@ AI_SINGLE_BATTLE_TEST("AI will select Throat Chop if the sound move is the best 
         TURN { EXPECT_MOVE(opponent, MOVE_THROAT_CHOP); MOVE(player, MOVE_HYPER_VOICE);}
     }
 }
+
+AI_SINGLE_BATTLE_TEST("Explosion interaction - glalie should correctly score crunch over EQ when high enough HP, or pick explosion when it's viable"){
+
+    u32 hpVal;
+    PARAMETRIZE { hpVal = 1; }
+    PARAMETRIZE { hpVal = 138; }
+
+    GIVEN{
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_TRY_TO_FAINT | AI_FLAG_CHECK_VIABILITY | AI_FLAG_SMART_SWITCHING | AI_FLAG_SMART_MON_CHOICES | AI_FLAG_OMNISCIENT);
+        PLAYER(SPECIES_CLOYSTER) {
+            Level(44);
+            HP(68); 
+            Item(ITEM_SITRUS_BERRY); 
+            Nature(NATURE_ADAMANT);
+            Ability(ABILITY_SHELL_ARMOR);
+            Moves(MOVE_DETECT, MOVE_RAZOR_SHELL, MOVE_ICICLE_SPEAR, MOVE_ICE_SHARD);
+        }
+        OPPONENT(SPECIES_GLALIE_MEGA) {
+            Level(44);
+            HP(hpVal);
+            Nature(NATURE_JOLLY);
+            Ability(ABILITY_REFRIGERATE);
+            Moves(MOVE_RETURN, MOVE_EARTHQUAKE, MOVE_EXPLOSION, MOVE_CRUNCH);
+        }
+    } WHEN {
+        TURN{
+            MOVE(player, MOVE_RAZOR_SHELL);
+            EXPECT_MOVE(opponent, hpVal == 1 ? MOVE_EXPLOSION : MOVE_EARTHQUAKE);
+        }
+    }
+}
+
+AI_SINGLE_BATTLE_TEST("Explosion interaction - glalie should correctly score crunch over EQ when high enough HP, or pick low sweep over explosion due to explosion negative effect"){
+
+    u32 hpVal;
+    PARAMETRIZE { hpVal = 1; }
+    PARAMETRIZE { hpVal = 138; }
+
+    GIVEN{
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_TRY_TO_FAINT | AI_FLAG_CHECK_VIABILITY | AI_FLAG_SMART_SWITCHING | AI_FLAG_SMART_MON_CHOICES | AI_FLAG_OMNISCIENT);
+        PLAYER(SPECIES_CLOYSTER) {
+            Level(44);
+            HP(68); 
+            Item(ITEM_SITRUS_BERRY); 
+            Nature(NATURE_ADAMANT);
+            Ability(ABILITY_SHELL_ARMOR);
+            Moves(MOVE_DETECT, MOVE_RAZOR_SHELL, MOVE_ICICLE_SPEAR, MOVE_ICE_SHARD);
+        }
+        OPPONENT(SPECIES_GLALIE_MEGA) {
+            Level(44);
+            HP(hpVal);
+            Nature(NATURE_JOLLY);
+            Ability(ABILITY_REFRIGERATE);
+            Moves(MOVE_LOW_SWEEP, MOVE_EARTHQUAKE, MOVE_EXPLOSION, MOVE_CRUNCH);
+        }
+    } WHEN {
+        TURN{
+            MOVE(player, MOVE_RAZOR_SHELL);
+            EXPECT_MOVE(opponent, hpVal == 1 ? MOVE_LOW_SWEEP : MOVE_LOW_SWEEP);
+        }
+    }
+}

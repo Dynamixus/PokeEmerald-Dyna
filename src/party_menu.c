@@ -8,6 +8,7 @@
 #include "battle_pike.h"
 #include "battle_pyramid.h"
 #include "battle_pyramid_bag.h"
+#include "battle_tower_team_preview.h"
 #include "bg.h"
 #include "bw_summary_screen.h"
 #include "contest.h"
@@ -255,7 +256,7 @@ EWRAM_DATA u8 gSelectedMonPartyId = 0;
 EWRAM_DATA MainCallback gPostMenuFieldCallback = NULL;
 static EWRAM_DATA u16 *sSlot1TilemapBuffer = 0; // for switching party slots
 static EWRAM_DATA u16 *sSlot2TilemapBuffer = 0; //
-EWRAM_DATA u8 gSelectedOrderFromParty[MAX_FRONTIER_PARTY_SIZE] = {0};
+EWRAM_DATA u8 gSelectedOrderFromParty[FRONTIER_PARTY_SIZE_FULL] = {0};
 static EWRAM_DATA u16 sPartyMenuItemId = 0;
 EWRAM_DATA u8 gBattlePartyCurrentOrder[PARTY_SIZE / 2] = {0}; // bits 0-3 are the current pos of Slot 1, 4-7 are Slot 2, and so on
 static EWRAM_DATA u8 sInitialLevel = 0;
@@ -471,6 +472,7 @@ static u8 GetBattleEntryLevelCap(void);
 static u8 GetMaxBattleEntries(void);
 static u8 GetMinBattleEntries(void);
 static void Task_ContinueChoosingHalfParty(u8);
+static void Task_DisplayPartyWaitForClose(u8 taskId);
 static void BufferBattlePartyOrder(u8 *, bool8);
 static void BufferBattlePartyOrderBySide(u8 *, u8, u8);
 static void Task_InitMultiPartnerPartySlideIn(u8);
@@ -482,8 +484,12 @@ static void Task_PartyMenuWaitForFade(u8 taskId);
 static void Task_ChooseContestMon(u8 taskId);
 static void CB2_ChooseContestMon(void);
 static void Task_ChoosePartyMon(u8 taskId);
+static void Task_DisplayPartyForTeamPreview(u8 taskId);
+static void Task_LoadOpponentPartyIntoPlayerParty(u8 taskId);
+static void Task_ReloadPlayerParty(u8 taskId);
 static void Task_ChooseMonForMoveRelearner(u8);
 static void CB2_ChooseMonForMoveRelearner(void);
+static void CB2_DisplayPartyReturn(void);
 static void Task_BattlePyramidChooseMonHeldItems(u8);
 static void ShiftMoveSlot(struct Pokemon*, u8, u8);
 static void BlitBitmapToPartyWindow_LeftColumn(u8, u8, u8, u8, u8, u8);
@@ -8011,6 +8017,60 @@ static void CB2_ChooseContestMon(void)
     gSpecialVar_0x8004 = gContestMonPartyIndex;
     gFieldCallback2 = CB2_FadeFromPartyMenu;
     SetMainCallback2(CB2_ReturnToField);
+}
+
+void DisplayPartyForTeamPreview(void)
+{
+    LockPlayerFieldControls();
+    FadeScreen(FADE_TO_BLACK, 0);
+    CreateTask(Task_DisplayPartyForTeamPreview, 10);
+}
+
+void Task_DisplayPartyForTeamPreview(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        CleanupOverworldWindowsAndTilemaps();
+        InitPartyMenu(PARTY_MENU_TYPE_FIELD, PARTY_LAYOUT_SINGLE, PARTY_ACTION_CANT_SWITCH, FALSE, PARTY_MSG_TEAM_PREVIEW, Task_DisplayPartyWaitForClose, CB2_DisplayPartyReturn);
+        DestroyTask(taskId);
+    }
+}
+
+static void Task_DisplayPartyWaitForClose(u8 taskId)
+{
+    if (JOY_NEW(B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        Task_ClosePartyMenu(taskId);
+    }
+}
+
+static void CB2_DisplayPartyReturn(void)
+{
+    gFieldCallback2 = CB2_FadeFromPartyMenu;
+    SetMainCallback2(CB2_ReturnToField);
+}
+
+void LoadOpponentPartyIntoPlayerParty(void)
+{
+    LockPlayerFieldControls();
+    CreateTask(Task_LoadOpponentPartyIntoPlayerParty, 10);
+}
+
+static void Task_LoadOpponentPartyIntoPlayerParty(u8 taskId) {
+    LoadOpponentTeamIntoPlayerParty();
+    DestroyTask(taskId);
+}
+
+void ReloadPlayerParty(void)
+{
+    LockPlayerFieldControls();
+    CreateTask(Task_ReloadPlayerParty, 10);
+}
+
+static void Task_ReloadPlayerParty(u8 taskId) {
+    RestorePlayerParty();
+    DestroyTask(taskId);
 }
 
 // Used as a script special for showing a party mon to various npcs (e.g. in-game trades, move deleter)

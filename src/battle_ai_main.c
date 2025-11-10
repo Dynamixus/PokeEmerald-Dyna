@@ -3217,6 +3217,10 @@ static void AI_CompareDamagingMoves(u32 battlerAtk, u32 battlerDef)
                     tempMoveScores[i] = 0;
                     isTwoTurnNotSemiInvulnerableMove[i] = FALSE;
                 }
+                else if (gMovesInfo[moves[i]].effect == EFFECT_EXPLOSION && AI_DATA->shouldConsiderExpolsion == FALSE){
+                    noOfHits[i] = -1;
+                    tempMoveScores[i] = 0;
+                }
                 else if (noOfHits[i] < leastHits && noOfHits[i] != 0)
                 {
                     leastHits = noOfHits[i];

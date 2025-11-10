@@ -5957,12 +5957,12 @@ bool32 TrySetAteType(u32 move, u32 battlerAtk, u32 attackerAbility)
 
 // Returns TYPE_NONE if type doesn't change.
 // NULL can be passed to ateBoost to avoid applying ate-ability boosts when opening the summary screen in-battle.
-u32 GetDynamicMoveType(struct Pokemon *mon, u32 move, u32 battler, u8 *ateBoost)
+u32 GetDynamicMoveType(struct Pokemon *mon, u32 move, u32 battler, u8 *ateBoost, bool32 state)
 {
     u32 moveType = gMovesInfo[move].type;
     u32 moveEffect = gMovesInfo[move].effect;
     u32 species, heldItem, holdEffect, ability, type1, type2, type3;
-    bool32 monInBattle = gMain.inBattle && gPartyMenu.menuType != PARTY_MENU_TYPE_IN_BATTLE;
+    bool32 monInBattle = state;
 
     if (move == MOVE_STRUGGLE)
         return TYPE_NORMAL;
@@ -6192,7 +6192,8 @@ void SetTypeBeforeUsingMove(u32 move, u32 battler)
     moveType = GetDynamicMoveType(&GetBattlerParty(battler)[gBattlerPartyIndexes[battler]],
                                   move,
                                   battler,
-                                  &gBattleStruct->ateBoost[battler]);
+                                  &gBattleStruct->ateBoost[battler],
+                                  gMain.inBattle);
     if (moveType != TYPE_NONE)
         gBattleStruct->dynamicMoveType = moveType | F_DYNAMIC_TYPE_SET;
 
