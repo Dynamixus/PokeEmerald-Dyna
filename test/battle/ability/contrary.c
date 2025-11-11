@@ -241,3 +241,31 @@ SINGLE_BATTLE_TEST("Sticky Web raises Speed by 1 for Contrary mon on switch-in")
         MESSAGE("Foe Snivy's Speed rose!");
     }
 }
+
+AI_SINGLE_BATTLE_TEST("AI sees contrary-effected moves correctly in MoveEffectInPlus")
+{
+    GIVEN{
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_TRY_TO_FAINT | AI_FLAG_CHECK_VIABILITY | AI_FLAG_SMART_SWITCHING | AI_FLAG_SMART_MON_CHOICES | AI_FLAG_OMNISCIENT);
+        PLAYER(SPECIES_HERACROSS){
+            Level(44);
+            HP(1);
+            Speed(5);
+            Nature(NATURE_ADAMANT);
+            Item(ITEM_LOADED_DICE);
+            Moves(MOVE_PIN_MISSILE);
+        }
+        OPPONENT(SPECIES_SERPERIOR){
+            Level(44);
+            Speed(10);
+            Item(ITEM_FOCUS_SASH);
+            Nature(NATURE_TIMID);
+            Ability(ABILITY_CONTRARY);
+            Moves(MOVE_LEAF_STORM, MOVE_DRAGON_PULSE, MOVE_HIDDEN_POWER, MOVE_GLARE);
+        }
+    } WHEN {
+        TURN{
+            MOVE(player, MOVE_PIN_MISSILE);
+            EXPECT_MOVE(opponent, MOVE_LEAF_STORM); // previously all damaging moves 107, now scores leaf storm 107 vs other attacks 106
+        }
+    }
+}
