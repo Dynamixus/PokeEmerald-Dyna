@@ -21,7 +21,6 @@ enum {
     MON_DATA_SANITY_IS_EGG,
     MON_DATA_OT_NAME,
     MON_DATA_MARKINGS,
-    MON_DATA_CHECKSUM,
     MON_DATA_HP,
     MON_DATA_IS_SHINY,
     MON_DATA_HIDDEN_NATURE,
@@ -210,7 +209,7 @@ struct BoxPokemon
     u32 otId;
     //  word
     u8 nickname[min(10, POKEMON_NAME_LENGTH)];
-    u16 checksum;
+    u16 unused_checksum;
     //  word
     u8 otName[PLAYER_NAME_LENGTH];
     u32 compressedStatus:4;
