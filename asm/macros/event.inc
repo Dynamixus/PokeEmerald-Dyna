@@ -1859,7 +1859,7 @@
 	.4byte \text
 	.endm
 
-	@ Equivalent to fadescreen but copies gPlttBufferUnfaded to gDecompressionBuffer on the fade out
+	@ Equivalent to fadescreen but copies gPlttBufferUnfaded to an allocated buffer on the fade out
 	@ and the reverse on the fade in, in effect saving gPlttBufferUnfaded to restore it.
 	.macro fadescreenswapbuffers mode:req
 	.byte 0xdc
@@ -1989,6 +1989,12 @@
 	.4byte \products
 	.endm
 
+	@ Sets the species ID of the starter into VAR_0x8006, species name into the string var
+	.macro bufferstarterinfo stringVarId:req, startertype:req
+	.byte 0xeb
+	stringvar \stringVarId
+	.2byte \startertype
+	.endm
 
 @ Supplementary
 

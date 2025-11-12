@@ -1163,118 +1163,134 @@ BattleFrontier_BattleArenaBattleRoom_Text_IsThatRight:
 # 582 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
 BattleFrontier_BattleArenaBattleRoom_Text_YouLookWeakTakeThingsEasy:
 # 583 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "I don't know how to say it, but…\n"
+	.string "Well, I'm told you were that kid\n"
 # 584 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "To put it bluntly, you look pretty weak.\l"
+	.string "on TV… HOENN's hero…\p"
 # 585 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "Are you sure you're up for me?\p"
+	.string "I don't know how to say it, but…\n"
 # 586 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "Hmm…\p"
+	.string "To put it bluntly, you look pretty weak.\l"
 # 587 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "Well, all right!\n"
+	.string "Are you sure you're up for me?\p"
 # 588 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "We'll take things easy to start with!$"
-# 589 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-
-# 590 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-BattleFrontier_BattleArenaBattleRoom_Text_IgniteMyPassionForBattle:
-# 591 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "Okay! Let's see you ignite my passion\n"
-# 592 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "for battle!$"
-# 593 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-
-# 594 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-BattleFrontier_BattleArenaBattleRoom_Text_GretaYoureToughAfterAll:
-# 595 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "GRETA: Ow, wait a second!\n"
-# 596 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "You are tough after all!\p"
-# 597 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "I like you!\n"
-# 598 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "Let's see your FRONTIER PASS.$"
-# 599 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-
-# 600 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-BattleFrontier_BattleArenaBattleRoom_Text_ReceivedGutsSymbol:
-# 601 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "The Guts Symbol was embossed on\n"
-# 602 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "the FRONTIER PASS!$"
-# 603 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-
-# 604 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-BattleFrontier_BattleArenaBattleRoom_Text_GoingToBeFunNextTime:
-# 605 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
 	.string "Hmm…\p"
+# 589 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+	.string "Well, all right!\n"
+# 590 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+	.string "We'll take things easy to start with!$"
+# 591 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+
+# 592 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+BattleFrontier_BattleArenaBattleRoom_Text_IgniteMyPassionForBattle:
+# 593 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+	.string "Okay! Let's see you ignite my passion\n"
+# 594 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+	.string "for battle!$"
+# 595 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+
+# 596 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+BattleFrontier_BattleArenaBattleRoom_Text_GretaYoureToughAfterAll:
+# 597 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+	.string "GRETA: Ow, wait a second!\n"
+# 598 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+	.string "You are tough after all!\p"
+# 599 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+	.string "I like you, kid!\n"
+# 600 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+	.string "Let's see your FRONTIER PASS.$"
+# 601 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+
+# 602 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+BattleFrontier_BattleArenaBattleRoom_Text_ReceivedGutsSymbol:
+# 603 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+	.string "The Guts Symbol was embossed on\n"
+# 604 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+	.string "the FRONTIER PASS!$"
+# 605 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+
 # 606 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "It's going to be fun the next time!\n"
+BattleFrontier_BattleArenaBattleRoom_Text_GoingToBeFunNextTime:
 # 607 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "I'm looking forward to it!$"
+	.string "Hmm…\p"
 # 608 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-
+	.string "It's going to be fun the next time!\n"
 # 609 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-BattleFrontier_BattleArenaBattleRoom_Text_GretaLookingForwardToSeeingAgain:
+	.string "I'm looking forward to it!$"
 # 610 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "GRETA: Hey! Howdy!\n"
+
 # 611 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "You finally won your way up to me!\p"
+BattleFrontier_BattleArenaBattleRoom_Text_GretaLookingForwardToSeeingAgain:
 # 612 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "I was getting worried waiting for you!\n"
+	.string "GRETA: Hey! Howdy, kid!\n"
 # 613 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "I was really looking forward to seeing\l"
+	.string "You finally won your way up to me!\p"
 # 614 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "you again!$"
+	.string "I was getting worried waiting for you!\n"
 # 615 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-
+	.string "I was really looking forward to seeing\l"
 # 616 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-BattleFrontier_BattleArenaBattleRoom_Text_SoAreYouReady:
+	.string "you again!$"
 # 617 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "… … …\n"
-# 618 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "So, are you ready?$"
-# 619 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
 
+# 618 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+BattleFrontier_BattleArenaBattleRoom_Text_SoAreYouReady:
+# 619 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+	.string "The truth is most of these challengers\n"
 # 620 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-BattleFrontier_BattleArenaBattleRoom_Text_WontAllowHalfheartedEffort:
+	.string "bore me… but you're different.\p"
 # 621 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "I won't allow a halfhearted effort!\n"
+	.string "… … …\p"
 # 622 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "Be ready for a thrashing!$"
+	.string "So, are you ready?$"
 # 623 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
 
 # 624 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-BattleFrontier_BattleArenaBattleRoom_Text_LetsGetThisStarted:
+BattleFrontier_BattleArenaBattleRoom_Text_WontAllowHalfheartedEffort:
 # 625 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "Come on, REFEREE!\n"
+	.string "I won't allow a halfhearted effort!\n"
 # 626 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "Let's get this started!$"
+	.string "Be ready for a thrashing, kid!$"
 # 627 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
 
 # 628 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-BattleFrontier_BattleArenaBattleRoom_Text_GretaBlownAway:
+BattleFrontier_BattleArenaBattleRoom_Text_LetsGetThisStarted:
 # 629 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "GRETA: Gaaah! Blown away!\n"
+	.string "Come on, REFEREE!\n"
 # 630 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "Let's see your FRONTIER PASS!$"
+	.string "Let's get this started!$"
 # 631 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
 
 # 632 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-BattleFrontier_BattleArenaBattleRoom_Text_GutsSymbolTookGoldenShine:
+BattleFrontier_BattleArenaBattleRoom_Text_GretaBlownAway:
 # 633 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "The Guts Symbol took on\n"
+	.string "GRETA: Gaaah! Blown away!\n"
 # 634 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "a golden shine!$"
+	.string "Don't go getting cocky now, kid!\l"
 # 635 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-
+	.string "Ugh! I guess I have to call you by\l"
 # 636 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-BattleFrontier_BattleArenaBattleRoom_Text_IfWeBattleAgainWontLose:
+	.string "your name now…\p"
 # 637 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "Arrrgh!\n"
+	.string "OK {PLAYER}! Let's see your\n"
 # 638 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "This is so infuriating!\p"
+	.string "FRONTIER PASS!$"
 # 639 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
-	.string "If we ever battle again, I won't lose!\n"
+
 # 640 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+BattleFrontier_BattleArenaBattleRoom_Text_GutsSymbolTookGoldenShine:
+# 641 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+	.string "The Guts Symbol took on\n"
+# 642 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+	.string "a golden shine!$"
+# 643 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+
+# 644 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+BattleFrontier_BattleArenaBattleRoom_Text_IfWeBattleAgainWontLose:
+# 645 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+	.string "Arrrgh!\n"
+# 646 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+	.string "This is so infuriating!\p"
+# 647 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
+	.string "If we ever battle again, I won't lose!\n"
+# 648 "data/maps/BattleFrontier_BattleArenaBattleRoom/scripts.pory"
 	.string "Don't you forget it! Bye-bye!$"

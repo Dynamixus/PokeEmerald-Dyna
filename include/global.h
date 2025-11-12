@@ -19,6 +19,7 @@
 #include "constants/trainer_hill.h"
 #include "constants/items.h"
 #include "config/save.h"
+#include "config/ai.h"
 
 // Prevent cross-jump optimization.
 #define BLOCK_CROSS_JUMP asm("");
@@ -398,7 +399,7 @@ struct BattleFrontier
               u8 challengePaused:1;
               u8 disableRecordBattle:1;
               //u8 padding1:4;
-    /*0xCAA*/ u16 selectedPartyMons[MAX_FRONTIER_PARTY_SIZE];
+    /*0xCAA*/ u16 selectedPartyMons[FRONTIER_PARTY_SIZE_FULL];
     /*0xCB2*/ u16 curChallengeBattleNum; // Battle number / room number (Pike) / floor number (Pyramid)
     /*0xCB4*/ u16 trainerIds[20];
     /*0xCDC*/ u32 winStreakActiveFlags;
@@ -1124,7 +1125,7 @@ struct SaveBlock1
 #endif //FREE_TRAINER_HILL
     /*0x3???*/ struct WaldaPhrase waldaPhrase;
                u8 dexNavSearchLevels[NUM_SPECIES];
-               u8 unused_speciesPadding[100];
+               u8 unused_speciesPadding[98];         // if you increase NUM_SPECIES, decrease this by the same amount: 1533->1535;100->98
                u8 dexNavChain;
                u8 registeredItemLastSelected:4; //max 16 items
                u8 registeredItemListCount:4;

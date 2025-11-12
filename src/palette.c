@@ -2,6 +2,8 @@
 #include "palette.h"
 #include "util.h"
 #include "decompress.h"
+#include "malloc.h"
+#include "menu.h"
 #include "gpu_regs.h"
 #include "task.h"
 #include "constants/rgb.h"
@@ -28,6 +30,8 @@ ALIGNED(4) EWRAM_DATA u16 gPlttBufferFaded[PLTT_BUFFER_SIZE] = {0};
 EWRAM_DATA struct PaletteFadeControl gPaletteFade = {0};
 static EWRAM_DATA u32 sPlttBufferTransferPending = 0;
 
+static EWRAM_DATA u32 sPlttPreviousUpdateResult = 0; // Fast Battle Speed
+
 static const u8 sRoundedDownGrayscaleMap[] = {
      0,  0,  0,  0,  0,
      5,  5,  5,  5,  5,
@@ -40,9 +44,9 @@ static const u8 sRoundedDownGrayscaleMap[] = {
 
 void LoadCompressedPalette(const u32 *src, u32 offset, u32 size)
 {
-    LZDecompressWram(src, gDecompressionBuffer);
-    CpuCopy16(gDecompressionBuffer, &gPlttBufferUnfaded[offset], size);
-    CpuCopy16(gDecompressionBuffer, &gPlttBufferFaded[offset], size);
+    void *buffer = malloc_and_decompress(src, NULL);
+    LoadPalette(buffer, offset, size);
+    Free(buffer);
 }
 
 void LoadPalette(const void *src, u32 offset, u32 size)
@@ -74,6 +78,8 @@ u32 UpdatePaletteFade(void)
 {
     u32 result;
 
+    sPlttPreviousUpdateResult = PALETTE_FADE_STATUS_LOADING;
+
     if (sPlttBufferTransferPending)
         return PALETTE_FADE_STATUS_LOADING;
 
@@ -85,9 +91,16 @@ u32 UpdatePaletteFade(void)
         result = UpdateHardwarePaletteFade();
 
     sPlttBufferTransferPending = gPaletteFade.multipurpose1;
+    sPlttPreviousUpdateResult = result;
 
     return result;
 }
+
+u32 PrevPaletteFadeResult(void)
+{
+    return sPlttPreviousUpdateResult;
+}
+
 
 void ResetPaletteFade(void)
 {

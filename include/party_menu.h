@@ -24,7 +24,7 @@ extern struct PartyMenu gPartyMenu;
 extern bool8 gPartyMenuUseExitCallback;
 extern u8 gSelectedMonPartyId;
 extern MainCallback gPostMenuFieldCallback;
-extern u8 gSelectedOrderFromParty[MAX_FRONTIER_PARTY_SIZE];
+extern u8 gSelectedOrderFromParty[FRONTIER_PARTY_SIZE_FULL];
 extern u8 gBattlePartyCurrentOrder[PARTY_SIZE / 2];
 extern const struct SpriteSheet sSpriteSheet_HeldItem;
 extern const struct SpritePalette sSpritePalette_HeldItem;
@@ -98,6 +98,9 @@ void ChooseMonForDaycare(void);
 bool8 CB2_FadeFromPartyMenu(void);
 void ChooseContestMon(void);
 void ChoosePartyMon(void);
+void LoadOpponentPartyIntoPlayerParty(void);
+void DisplayPartyForTeamPreview(void);
+void ReloadPlayerParty(void);
 void ChooseMonForMoveRelearner(void);
 void BattlePyramidChooseMonHeldItems(void);
 void DoBattlePyramidMonsHaveHeldItem(void);
@@ -109,5 +112,10 @@ void GetNumMovesSelectedMonHas(void);
 void MoveDeleterChooseMoveToForget(void);
 void CB2_ReturnToPartyMenuFromSummaryScreen(void);
 void ItemUseCB_PokeBall(u8 taskId, TaskFunc task);
+
+// Start hexorb Branch
+void ItemUseCB_UseHexorb(u8 taskId, TaskFunc task);
+void InitPartyMenuForItemUseFromField(u8 taskId);
+// End hexorb Branch
 
 #endif // GUARD_PARTY_MENU_H

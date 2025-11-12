@@ -33,13 +33,13 @@ SINGLE_BATTLE_TEST("Frostbite deals 1/16th (Gen7+) or 1/8th damage to affected p
     } WHEN {
         TURN {}
     } SCENE {
-        MESSAGE("The opposing Wobbuffet was hurt by its frostbite!");
+        MESSAGE("Foe Wobbuffet is hurt by its frostbite!");
         ANIMATION(ANIM_TYPE_STATUS, B_ANIM_STATUS_FRZ, opponent);
         HP_BAR(opponent, captureDamage: &frostbiteDamage);
    } THEN { EXPECT_EQ(frostbiteDamage, opponent->maxHP / ((B_BURN_DAMAGE >= GEN_7) ? 16 : 8)); }
 }
 
-SINGLE_BATTLE_TEST("Frostbite is healed if hit with a thawing move")
+SINGLE_BATTLE_TEST("Frostbite is healed if hit with a thawing move (fire type or has burn effect)")
 {
     u32 move;
 
@@ -56,13 +56,7 @@ SINGLE_BATTLE_TEST("Frostbite is healed if hit with a thawing move")
         TURN { MOVE(player, move); }
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, move, player);
-        if (move == MOVE_EMBER) {
-            NONE_OF {
-                MESSAGE("The opposing Wobbuffet's frostbite was cured!");
-            }
-        } else {
-            MESSAGE("The opposing Wobbuffet's frostbite was cured!");
-        }
+        MESSAGE("Foe Wobbuffet's frostbite was healed!");
    }
 }
 
@@ -75,6 +69,7 @@ SINGLE_BATTLE_TEST("Frostbite is healed when the user uses a thawing move")
     PARAMETRIZE { move = MOVE_FLARE_BLITZ; }
     PARAMETRIZE { move = MOVE_FUSION_FLARE; }
     PARAMETRIZE { move = MOVE_EMBER; }
+    PARAMETRIZE { move = MOVE_SCALD; }
 
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Status1(STATUS1_FROSTBITE); }
@@ -85,13 +80,27 @@ SINGLE_BATTLE_TEST("Frostbite is healed when the user uses a thawing move")
         ANIMATION(ANIM_TYPE_MOVE, move, player);
         HP_BAR(opponent);
         if (move == MOVE_EMBER) {
-            MESSAGE("Wobbuffet was hurt by its frostbite!");
+            MESSAGE("Wobbuffet is hurt by its frostbite!");
             ANIMATION(ANIM_TYPE_STATUS, B_ANIM_STATUS_FRZ, player);
         } else {
             NONE_OF {
-                MESSAGE("Wobbuffet was hurt by its frostbite!");
+                MESSAGE("Wobbuffet is hurt by its frostbite!");
                 ANIMATION(ANIM_TYPE_STATUS, B_ANIM_STATUS_FRZ, player);
             }
         }
    }
+}
+
+SINGLE_BATTLE_TEST("Defrost: Scald does not thaw targets if user is asleep")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Status1(STATUS1_FROSTBITE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Status1(STATUS1_SLEEP_TURN(3)); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_SCALD); MOVE(player, MOVE_CELEBRATE); }
+    } SCENE {
+        NOT ANIMATION(ANIM_TYPE_MOVE, MOVE_SCALD, opponent);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, player);
+        HP_BAR(player);
+    }
 }

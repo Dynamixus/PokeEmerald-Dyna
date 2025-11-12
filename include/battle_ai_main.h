@@ -51,6 +51,14 @@ typedef s32 (*AiScoreFunc)(u32, u32, u32, s32);
 #define STRONG_RISKY_EFFECT     3
 #define AVERAGE_RISKY_EFFECT    2
 
+enum MoveComparisonResult
+{
+    MOVE_NEUTRAL_COMPARISON,
+    MOVE_WON_COMPARISON,
+    MOVE_LOST_COMPARISON,
+    MOVE_DOUBLE_OHKO_COMPARISON,
+};
+
 #include "test_runner.h"
 
 // Logs for debugging AI tests.
@@ -104,6 +112,7 @@ void Ai_UpdateSwitchInData(u32 battler);
 void Ai_UpdateFaintData(u32 battler);
 void SetAiLogicDataForTurn(struct AiLogicData *aiData);
 void ResetDynamicAiFunc(void);
+u32 GetStatBeingLoweredFromMoveEffect(u32 statChange);
 
 extern u8 sBattler_AI;
 

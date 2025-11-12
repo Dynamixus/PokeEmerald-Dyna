@@ -16,11 +16,11 @@ SINGLE_BATTLE_TEST("Desolate Land blocks damaging Water-type moves")
         TURN { MOVE(opponent, MOVE_WATER_GUN); }
         TURN { MOVE(opponent, MOVE_WATER_GUN); }
     } SCENE {
-        MESSAGE("The opposing Wobbuffet used Water Gun!");
+        MESSAGE("Foe Wobbuffet used Water Gun!");
         NOT ANIMATION(ANIM_TYPE_MOVE, MOVE_WATER_GUN, opponent);
         MESSAGE("The Water-type attack evaporated in the extremely harsh sunlight!");
         NOT HP_BAR(player);
-        MESSAGE("The opposing Wobbuffet used Water Gun!");
+        MESSAGE("Foe Wobbuffet used Water Gun!");
         NOT ANIMATION(ANIM_TYPE_MOVE, MOVE_WATER_GUN, opponent);
         MESSAGE("The Water-type attack evaporated in the extremely harsh sunlight!");
         NOT HP_BAR(player);
@@ -42,7 +42,7 @@ DOUBLE_BATTLE_TEST("Desolate Land blocks damaging Water-type moves and prints th
     } WHEN {
         TURN { MOVE(opponentLeft, MOVE_SURF); }
     } SCENE {
-        MESSAGE("The opposing Wobbuffet used Surf!");
+        MESSAGE("Foe Wobbuffet used Surf!");
         NOT ANIMATION(ANIM_TYPE_MOVE, MOVE_SURF, opponentLeft);
         MESSAGE("The Water-type attack evaporated in the extremely harsh sunlight!");
         NOT MESSAGE("The Water-type attack evaporated in the extremely harsh sunlight!");
@@ -62,6 +62,24 @@ SINGLE_BATTLE_TEST("Desolate Land does not block a move if pokemon is asleep and
         TURN { MOVE(opponent, MOVE_WATER_GUN); }
     } SCENE {
         NOT MESSAGE("The Water-type attack evaporated in the extremely harsh sunlight!");
-        MESSAGE("The opposing Wobbuffet is fast asleep.");
+        MESSAGE("Foe Wobbuffet is fast asleep.");
+    }
+}
+
+SINGLE_BATTLE_TEST("Desolate Land will not create a softlock when move in semi invulnerable position is blocked")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_GROUDON) { Item(ITEM_RED_ORB); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_DIVE); }
+        TURN { SWITCH(opponent, 1); SKIP_TURN(player); }
+        TURN { MOVE(player, MOVE_CELEBRATE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_DIVE, player);
+        ABILITY_POPUP(opponent, ABILITY_DESOLATE_LAND);
+        NOT ANIMATION(ANIM_TYPE_MOVE, MOVE_DIVE, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, player);
     }
 }

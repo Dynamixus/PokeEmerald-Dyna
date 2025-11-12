@@ -24,49 +24,66 @@ const u16 gStarterAndGiftMonTable[MY_STARTER_AND_GIFT_MON_COUNT] =
     SPECIES_CYNDAQUIL,
     SPECIES_MUDKIP,
     SPECIES_TREECKO,
-    SPECIES_TORCHIC,
+    SPECIES_TORCHIC, //8
     SPECIES_PIPLUP,
-    SPECIES_TURTWIG, //10
+    SPECIES_TURTWIG,
     SPECIES_CHIMCHAR,
     SPECIES_OSHAWOTT,
     SPECIES_SNIVY,
     SPECIES_TEPIG,
     SPECIES_FROAKIE,
-    SPECIES_CHESPIN,
+    SPECIES_CHESPIN, // 16
     SPECIES_FENNEKIN,
     SPECIES_POPPLIO,
     SPECIES_ROWLET,
-    SPECIES_LITTEN, //20
+    SPECIES_LITTEN,
     SPECIES_SOBBLE,
     SPECIES_GROOKEY,
     SPECIES_SCORBUNNY,
-    SPECIES_QUAXLY,
+    SPECIES_QUAXLY,    // 24
     SPECIES_SPRIGATITO,
     SPECIES_FUECOCO,
     SPECIES_KUBFU,
     SPECIES_ZERAORA,  // gift mythical
     SPECIES_CHARCADET,
-    SPECIES_TYROGUE, //30
-    SPECIES_CASTFORM_NORMAL,
-    SPECIES_LILEEP,
-    SPECIES_ANORITH,
-    SPECIES_MELTAN, // gift mythical
+    SPECIES_TYROGUE,
+    SPECIES_LILEEP, 
+    SPECIES_ANORITH, //32
+    SPECIES_MELTAN, // gift from steven post game
     SPECIES_CELEBI, // gift mythical
     SPECIES_DARKRAI, //36, gift mythical
     SPECIES_PIKACHU_COSPLAY,
     SPECIES_PIKACHU_ROCK_STAR,
     SPECIES_PIKACHU_BELLE,
     SPECIES_PIKACHU_POP_STAR,
-    SPECIES_PIKACHU_PHD,
-    SPECIES_PIKACHU_LIBRE, //42
+    SPECIES_PIKACHU_PHD, //40
+    SPECIES_PIKACHU_LIBRE,
     SPECIES_VICTINI, // gift mythical
     SPECIES_HOOPA_CONFINED, // gift mythical
     SPECIES_DITTO,
     SPECIES_GENESECT, // gift mythical
     SPECIES_MELOETTA_ARIA, // gift mythical
-    SPECIES_BELDUM, //48
-    SPECIES_ZARUDE, // gift mythical
-    SPECIES_MARSHADOW // gift mythical
+    SPECIES_JIRACHI,       // gift mythical
+    SPECIES_ZARUDE, // 48, gift mythical
+    SPECIES_MARSHADOW, // gift mythical
+    SPECIES_TOGEPI,
+    SPECIES_RIOLU,
+    SPECIES_PIKACHU_SURFING,
+    SPECIES_PIKACHU_FLYING,
+    SPECIES_PANSAGE,
+    SPECIES_PANPOUR,
+    SPECIES_PANSEAR, //56
+    SPECIES_SCYTHER,
+    SPECIES_HERACROSS,
+    SPECIES_PINSIR,
+    SPECIES_MISDREAVUS,
+    SPECIES_ELEKID,
+    SPECIES_MAGBY,
+    SPECIES_SMOOCHUM,
+    SPECIES_EEVEE, // 64
+    SPECIES_TYPE_NULL,
+    SPECIES_VOLCANION,
+    SPECIES_AERODACTYL
 };
 
 // mew post game
@@ -87,13 +104,13 @@ const u16 gStarterAndGiftMonTable[MY_STARTER_AND_GIFT_MON_COUNT] =
 // magearna wild: evergrande city
 // marshadow gift
 // zeraora gift
-// meltan gift
+// jirachi gift
 // zarude gift
 // pecharunt wild: mt pyre
 
 const u16 gEggMonTable[MY_EGG_MON_COUNT] =
 {
-    SPECIES_SQUIRTLE,
+    SPECIES_SQUIRTLE, //0
     SPECIES_BULBASAUR,
     SPECIES_CHARMANDER,
     SPECIES_TOTODILE,
@@ -117,13 +134,38 @@ const u16 gEggMonTable[MY_EGG_MON_COUNT] =
     SPECIES_SOBBLE,
     SPECIES_GROOKEY,
     SPECIES_SCORBUNNY,
-    SPECIES_QUAXLY,
-    SPECIES_SPRIGATITO,
+    SPECIES_QUAXLY,    
+    SPECIES_SPRIGATITO, //25
     SPECIES_FUECOCO,
-    SPECIES_EEVEE,
-    SPECIES_TYPE_NULL,
-    SPECIES_RIOLU,
-    SPECIES_TOGEPI,
+    SPECIES_SENTRET,
+    SPECIES_JIGGLYPUFF,
+    SPECIES_KRICKETOT,
+    SPECIES_CUBONE, //30
+    SPECIES_PANCHAM,
+    SPECIES_YAMPER,
+    SPECIES_ROCKRUFF,
+    SPECIES_SNORUNT,
+    SPECIES_SPOINK,
+    SPECIES_VAROOM,
+    SPECIES_DRATINI,
+    SPECIES_LARVITAR,
+    SPECIES_BAGON,
+    SPECIES_BELDUM, //40
+    SPECIES_GIBLE,
+    SPECIES_DEINO,
+    SPECIES_GOOMY,
+    SPECIES_JANGMO_O,
+    SPECIES_DREEPY,
+    SPECIES_FRIGIBAX, //46
+    SPECIES_TAUROS,
+    SPECIES_DELIBIRD,
+    SPECIES_TROPIUS,
+    SPECIES_SPIRITOMB,
+    SPECIES_HEATMOR,
+    SPECIES_DEDENNE,
+    SPECIES_BRUXISH,
+    SPECIES_FALINKS,
+    SPECIES_KLAWF // 55
 };
 
 bool32 RandomizerFeatureEnabled(enum RandomizerFeature feature)
@@ -1086,29 +1128,36 @@ static inline bool32 IsAbilityIllegal(u16 ability)
     return FALSE;
 }
 
+
 // Given a species and an abilityNum, returns a replacement for that ability.
 u16 RandomizeAbility(u16 species, u8 abilityNum, u16 originalAbility)
 {
+
     if (RandomizerFeatureEnabled(RANDOMIZE_ABILITIES))
     {
-        struct Sfc32State state;
-        u16 result;
-        u32 seed;
+        u8 actualAbilityNum = abilityNum;
+        // If the ability slot is ABILITY_NONE, find the last valid ability slot
+        if (gSpeciesInfo[species].abilities[abilityNum] == ABILITY_NONE && abilityNum > 0)
+        {
+            // Search backwards from the current slot to find the last valid ability
+            for (s8 i = abilityNum - 1; i >= 0; i--)
+            {
+                if (gSpeciesInfo[species].abilities[i] != ABILITY_NONE)
+                {
+                    actualAbilityNum = i;
+                    break;
+                }
+            }
+        }
 
-        //if (!ShouldRandomizeItem(itemId))
-        //    return abilityNum;
-
-        // Seed the generator using the species and the original abilityNum 
-        seed = ((u32)species) << 8;
-        seed |= abilityNum;
-
-        state = RandomizerRandSeed(RANDOMIZER_REASON_ABILITIES, seed, species);
+        // Seed the generator using the species and the actual ability slot
+        u32 seed = ((u32)species << 8) | actualAbilityNum;
+        struct Sfc32State state = RandomizerRandSeed(RANDOMIZER_REASON_ABILITIES, seed, species);
 
         // Randomize abilities
-        result = sRandomizerAbilityWhitelist[RandomizerNextRange(&state, ABILITY_WHITELIST_SIZE)];
-
-        return result;
+        return sRandomizerAbilityWhitelist[RandomizerNextRange(&state, ABILITY_WHITELIST_SIZE)];
     }
+
     return originalAbility;
 }
 

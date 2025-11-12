@@ -40,6 +40,80 @@ OldaleTown_PokemonCenter_1F_EventScript_WirelessClubAvailable::
 	release
 	end
 
+OldaleTown_PokemonCenter_1F_EventScript_EggMan::
+	lock
+	faceplayer
+	goto_if_unset FLAG_SYS_DEXNAV_GET, OldaleTown_PokemonCenter_1F_EventScript_NotReadyForEggYet
+	goto_if_set FLAG_RECEIVED_OLDALE_EGG, OldaleTown_PokemonCenter_1F_EventScript_ReceivedEgg
+	msgbox OldaleTown_PokemonCenter_1F_Text_HaveEggWillYouTakeIt, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, OldaleTown_PokemonCenter_1F_EventScript_DeclineEgg
+	getpartysize
+	goto_if_eq VAR_RESULT, PARTY_SIZE, OldaleTown_PokemonCenter_1F_EventScript_NoRoomForEgg
+	msgbox OldaleTown_PokemonCenter_1F_Text_HopeYoullWalkPlentyWithEgg, MSGBOX_DEFAULT
+	setflag FLAG_RECEIVED_OLDALE_EGG
+	playfanfare MUS_OBTAIN_ITEM
+	message OldaleTown_PokemonCenter_1F_Text_ReceivedTheEgg
+	waitfanfare
+	giveegg SPECIES_SENTRET
+	release
+	end
+
+OldaleTown_PokemonCenter_1F_EventScript_NotReadyForEggYet::
+	msgbox OldaleTown_PokemonCenter_1F_Text_NotReadyForEggYet, MSGBOX_DEFAULT
+	release
+	end
+
+OldaleTown_PokemonCenter_1F_EventScript_ReceivedEgg::
+	msgbox OldaleTown_PokemonCenter_1F_Text_EverySoOftenEggFoundAtDayCare, MSGBOX_DEFAULT
+	release
+	end
+
+OldaleTown_PokemonCenter_1F_EventScript_DeclineEgg::
+	msgbox OldaleTown_PokemonCenter_1F_Text_AsYouWishThen, MSGBOX_DEFAULT
+	release
+	end
+
+OldaleTown_PokemonCenter_1F_EventScript_NoRoomForEgg::
+	msgbox OldaleTown_PokemonCenter_1F_Text_NoRoomForThisEgg, MSGBOX_DEFAULT
+	release
+	end
+
+OldaleTown_PokemonCenter_1F_Text_NotReadyForEggYet:
+	.string "I have an Egg here, and I am looking for\n"
+	.string "a trainer with enough experience to\l"
+	.string "take it from me to hatch it.\p"
+	.string "You don't seem like you have quite\n"
+	.string "enough experience yet; perhaps come\l"
+	.string "back after you've received a Pokédex.$"
+
+OldaleTown_PokemonCenter_1F_Text_EverySoOftenEggFoundAtDayCare:
+	.string "I truly have no idea what\n"
+	.string "is inside that egg.$"
+
+OldaleTown_PokemonCenter_1F_Text_HaveEggWillYouTakeIt:
+	.string "I have an Egg here, but I'm too old to be\n"
+	.string "running around for long enough for it\l"
+	.string "to hatch.\p"
+	.string "I see you have a Pokédex, you must be a\n"
+	.string "trustworthy trainer.\p"
+	.string "Will you take this Egg from me?$"
+
+OldaleTown_PokemonCenter_1F_Text_AsYouWishThen:
+	.string "As you wish, then…\p"
+	.string "If you have a change of heart about\n"
+	.string "hatching this Egg, I will be here.$"
+
+OldaleTown_PokemonCenter_1F_Text_NoRoomForThisEgg:
+	.string "Oh? You've too many Pokémon.\n"
+	.string "There's no room for this Egg…$"
+
+OldaleTown_PokemonCenter_1F_Text_HopeYoullWalkPlentyWithEgg:
+	.string "Good! I hope you'll walk plenty with\n"
+	.string "that there Egg!$"
+
+OldaleTown_PokemonCenter_1F_Text_ReceivedTheEgg:
+	.string "{PLAYER} received the Egg.$"
+
 OldaleTown_PokemonCenter_1F_Text_TrainersCanUsePC:
 	.string "That PC in the corner there is\n"
 	.string "for any Pokémon TRAINER to use.\p"
@@ -77,9 +151,16 @@ script OldDaleTown_PokemonCenter_EventScript_SecondNurse {
 	else{
 		dynmultipush("Set Mon to Lvl Cap", 2)
 	}
+
+	if(!flag(FLAG_MET_REGULAR_MOVE_TUTOR)){
+		dynmultipush("{COLOR WHITE}{SHADOW LIGHT_GRAY}Set Box to Lvl Cap{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}", 3)
+	}
+	else{
+		dynmultipush("Set Box to Lvl Cap", 3)
+	}
 	
-	dynmultipush("White Out Counter", 3)
-	dynmultipush("Mode Info", 4)
+	dynmultipush("White Out Counter", 4)
+	dynmultipush("Mode Info", 5)
     dynmultipush("Cancel", MULTI_B_PRESSED)
     // setting initial selected to a non-existant ID will always have it point to the first option
 	//.macro dynmultistack left:req, top:req, ignoreBPress:req, maxBeforeScroll:req, shouldSort:req, initialSelected:req, callbacks:req
@@ -107,10 +188,15 @@ script OldDaleTown_PokemonCenter_EventScript_SecondNurse {
 
 	if (var(VAR_RESULT) == 3)
 	{
-		goto(OldDaleTown_PokemonCenter_EventScript_SecondNurse_GetWhiteOutCount)	
+		goto(OldDaleTown_PokemonCenter_EventScript_SecondNurse_SetBoxToLevelCap)	
 	}
 
 	if (var(VAR_RESULT) == 4)
+	{
+		goto(OldDaleTown_PokemonCenter_EventScript_SecondNurse_GetWhiteOutCount)	
+	}
+
+	if (var(VAR_RESULT) == 5)
 	{
 		goto(OldDaleTown_PokemonCenter_EventScript_SecondNurse_ModeInfo)	
 	}
@@ -132,6 +218,74 @@ script OldDaleTown_PokemonCenter_EventScript_SecondNurse_ChangeNature{
 	}
 	special(BufferMonNickname)
 	msgbox("Which new Nature suits {STR_VAR_1}\nbest?")
+	if (var(VAR_NATURE_ORDER) == 1) {
+	// Attack boosting natures (+Atk -Atk, +Atk -Def, +Atk -Speed, +Atk -SpAtk, +Atk -SpDef)
+	dynmultipush("Lonely         {COLOR RED}{SHADOW LIGHT_RED}+Atk{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Def     ", NATURE_LONELY)
+	dynmultipush("Brave           {COLOR RED}{SHADOW LIGHT_RED}+Atk{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Speed     ", NATURE_BRAVE)
+	dynmultipush("Adamant       {COLOR RED}{SHADOW LIGHT_RED}+Atk{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-SpAtk", NATURE_ADAMANT)
+	dynmultipush("Naughty      {COLOR RED}{SHADOW LIGHT_RED}+Atk{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-SpDef   ", NATURE_NAUGHTY)
+
+	// Defense boosting natures (+Def -Atk, +Def -Def, +Def -Speed, +Def -SpAtk, +Def -SpDef)
+	dynmultipush("Bold             {COLOR RED}{SHADOW LIGHT_RED}+Def{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Atk       ", NATURE_BOLD)
+	dynmultipush("Relaxed       {COLOR RED}{SHADOW LIGHT_RED}+Def{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Speed   ", NATURE_RELAXED)
+	dynmultipush("Impish         {COLOR RED}{SHADOW LIGHT_RED}+Def{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-SpAtk   ", NATURE_IMPISH)
+	dynmultipush("Lax              {COLOR RED}{SHADOW LIGHT_RED}+Def{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-SpDef   ", NATURE_LAX)
+
+	// Speed boosting natures (+Speed -Atk, +Speed -Def, +Speed -Speed, +Speed -SpAtk, +Speed -SpDef)
+	dynmultipush("Timid           {COLOR RED}{SHADOW LIGHT_RED}+Speed{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Atk   ", NATURE_TIMID)
+	dynmultipush("Hasty          {COLOR RED}{SHADOW LIGHT_RED}+Speed{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Def     ", NATURE_HASTY)
+	dynmultipush("Jolly           {COLOR RED}{SHADOW LIGHT_RED}+Speed{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-SpAtk   ", NATURE_JOLLY)
+	dynmultipush("Naive          {COLOR RED}{SHADOW LIGHT_RED}+Speed{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-SpDef ", NATURE_NAIVE)
+
+	// Special Attack boosting natures (+SpAtk -Atk, +SpAtk -Def, +SpAtk -Speed, +SpAtk -SpAtk, +SpAtk -SpDef)
+	dynmultipush("Modest        {COLOR RED}{SHADOW LIGHT_RED}+SpAtk{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Atk   ", NATURE_MODEST)
+	dynmultipush("Mild             {COLOR RED}{SHADOW LIGHT_RED}+SpAtk{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Def   ", NATURE_MILD)
+	dynmultipush("Quiet          {COLOR RED}{SHADOW LIGHT_RED}+SpAtk{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Speed ", NATURE_QUIET)
+	dynmultipush("Rash            {COLOR RED}{SHADOW LIGHT_RED}+SpAtk{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-SpDef ", NATURE_RASH)
+
+	// Special Defense boosting natures (+SpDef -Atk, +SpDef -Def, +SpDef -Speed, +SpDef -SpAtk, +SpDef -SpDef)
+	dynmultipush("Calm             {COLOR RED}{SHADOW LIGHT_RED}+SpDef{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Atk     ", NATURE_CALM)
+	dynmultipush("Gentle         {COLOR RED}{SHADOW LIGHT_RED}+SpDef{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Def     ", NATURE_GENTLE)
+	dynmultipush("Sassy          {COLOR RED}{SHADOW LIGHT_RED}+SpDef{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Speed ", NATURE_SASSY)
+	dynmultipush("Careful       {COLOR RED}{SHADOW LIGHT_RED}+SpDef{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-SpAtk   ", NATURE_CAREFUL)
+
+	// Neutral natures
+	dynmultipush("Bashful        Neutral         ", NATURE_BASHFUL)
+	dynmultipush("Docile          Neutral         ", NATURE_DOCILE)
+	dynmultipush("Hardy           Neutral         ", NATURE_HARDY)
+	dynmultipush("Quirky          Neutral         ", NATURE_QUIRKY)
+	dynmultipush("Serious       Neutral         ", NATURE_SERIOUS)	
+
+	} 
+	elif(var(VAR_NATURE_ORDER) == 2)
+	{
+    dynmultipush("Adamant       {COLOR RED}{SHADOW LIGHT_RED}+Atk{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-SpAtk", NATURE_ADAMANT)
+    dynmultipush("Modest        {COLOR RED}{SHADOW LIGHT_RED}+SpAtk{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Atk   ", NATURE_MODEST)
+    dynmultipush("Timid           {COLOR RED}{SHADOW LIGHT_RED}+Speed{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Atk   ", NATURE_TIMID)
+    dynmultipush("Jolly           {COLOR RED}{SHADOW LIGHT_RED}+Speed{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-SpAtk   ", NATURE_JOLLY)
+    dynmultipush("Hasty          {COLOR RED}{SHADOW LIGHT_RED}+Speed{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Def     ", NATURE_HASTY)
+    dynmultipush("Naive          {COLOR RED}{SHADOW LIGHT_RED}+Speed{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-SpDef ", NATURE_NAIVE)
+    dynmultipush("Mild             {COLOR RED}{SHADOW LIGHT_RED}+SpAtk{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Def   ", NATURE_MILD)
+    dynmultipush("Naughty      {COLOR RED}{SHADOW LIGHT_RED}+Atk{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-SpDef   ", NATURE_NAUGHTY)
+    dynmultipush("Rash            {COLOR RED}{SHADOW LIGHT_RED}+SpAtk{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-SpDef ", NATURE_RASH)
+    dynmultipush("Lonely         {COLOR RED}{SHADOW LIGHT_RED}+Atk{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Def     ", NATURE_LONELY)
+    dynmultipush("Brave           {COLOR RED}{SHADOW LIGHT_RED}+Atk{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Speed     ", NATURE_BRAVE)
+    dynmultipush("Quiet          {COLOR RED}{SHADOW LIGHT_RED}+SpAtk{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Speed ", NATURE_QUIET)
+    dynmultipush("Calm             {COLOR RED}{SHADOW LIGHT_RED}+SpDef{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Atk     ", NATURE_CALM)
+    dynmultipush("Impish         {COLOR RED}{SHADOW LIGHT_RED}+Def{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-SpAtk   ", NATURE_IMPISH)
+    dynmultipush("Sassy          {COLOR RED}{SHADOW LIGHT_RED}+SpDef{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Speed ", NATURE_SASSY)
+    dynmultipush("Careful       {COLOR RED}{SHADOW LIGHT_RED}+SpDef{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-SpAtk   ", NATURE_CAREFUL)
+    dynmultipush("Relaxed       {COLOR RED}{SHADOW LIGHT_RED}+Def{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Speed   ", NATURE_RELAXED)
+    dynmultipush("Bold             {COLOR RED}{SHADOW LIGHT_RED}+Def{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Atk       ", NATURE_BOLD)
+    dynmultipush("Bashful        Neutral         ", NATURE_BASHFUL)
+    dynmultipush("Lax              {COLOR RED}{SHADOW LIGHT_RED}+Def{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-SpDef   ", NATURE_LAX)
+    dynmultipush("Gentle         {COLOR RED}{SHADOW LIGHT_RED}+SpDef{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Def     ", NATURE_GENTLE)
+    dynmultipush("Docile          Neutral         ", NATURE_DOCILE)
+    dynmultipush("Hardy           Neutral         ", NATURE_HARDY)
+    dynmultipush("Quirky          Neutral         ", NATURE_QUIRKY)
+    dynmultipush("Serious       Neutral         ", NATURE_SERIOUS)
+	} else {
+
 	dynmultipush("Adamant       {COLOR RED}{SHADOW LIGHT_RED}+Atk{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-SpAtk", NATURE_ADAMANT)
 	dynmultipush("Bashful        Neutral         ", NATURE_BASHFUL)
 	dynmultipush("Bold             {COLOR RED}{SHADOW LIGHT_RED}+Def{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Atk       ", NATURE_BOLD)
@@ -157,9 +311,10 @@ script OldDaleTown_PokemonCenter_EventScript_SecondNurse_ChangeNature{
 	dynmultipush("Sassy          {COLOR RED}{SHADOW LIGHT_RED}+SpDef{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Speed ", NATURE_SASSY)
 	dynmultipush("Serious       Neutral         ", NATURE_SERIOUS)
 	dynmultipush("Timid           {COLOR RED}{SHADOW LIGHT_RED}+Speed{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}/{COLOR BLUE}{SHADOW LIGHT_BLUE}-Atk   ", NATURE_TIMID)
+	}
 	dynmultipush("Cancel", MULTI_B_PRESSED)
 	// // setting initial selected to a non-existant ID will always have it point to the first option
-	dynmultistack(0, 0, FALSE, 6, FALSE, 3, DYN_MULTICHOICE_CB_NONE)
+	dynmultistack(0, 0, FALSE, 6, FALSE, 25, DYN_MULTICHOICE_CB_NONE)
 
 	if (var(VAR_RESULT) == MULTI_B_PRESSED) 
 	{
@@ -286,6 +441,37 @@ script OldDaleTown_PokemonCenter_EventScript_SecondNurse_SetToLevelCap{
 	closemessage
 	fadescreen(FADE_FROM_BLACK)
 	msgbox(MonHasBeenSetToLevelCap)
+	release
+	end
+}
+
+script OldDaleTown_PokemonCenter_EventScript_SecondNurse_SetBoxToLevelCap{
+	if(!flag(FLAG_MET_REGULAR_MOVE_TUTOR))
+	{
+		msgbox(FeatureAvailableAfterMoveTutor)
+		release
+		end
+	}
+	specialvar(VAR_0x8006, GetLevelCapForText)
+	buffernumberstring(STR_VAR_3, VAR_0x8006)
+	msgbox(TellLevelCapAndAskBox, MSGBOX_YESNO)
+	if(var(VAR_RESULT) == NO) 
+	{
+		goto(OldDaleTown_PokemonCenter_EventScript_SecondNurseNo)
+	}
+	msgbox(AreYouSureLevelCapBox, MSGBOX_YESNO)
+	if(var(VAR_RESULT) == NO) 
+	{
+		goto(OldDaleTown_PokemonCenter_EventScript_SecondNurseNo)
+	}
+	msgbox("Excellent. We shall begin at once!")
+	fadescreen(FADE_TO_BLACK)
+	special(LevelBoxesToCap)
+	playfanfare(MUS_OBTAIN_ITEM)
+	waitfanfare
+	closemessage
+	fadescreen(FADE_FROM_BLACK)
+	msgbox(BoxHasBeenSetToLevelCap)
 	release
 	end
 }
@@ -420,6 +606,31 @@ text MonHasBeenSetToLevelCap
 	"Come again if you need something else."
 }
 
+text TellLevelCapAndAskBox
+{
+	"Current Level Cap: {STR_VAR_3}.\p"
+	"I can set all Unmarked Pokémon in your\n"
+	"PC and Party to level {STR_VAR_3}.\p"
+	"{COLOR GREEN}{SHADOW LIGHT_GREEN}You can Mark Pokémon to NOT be leveled\n"
+	"up using the “Mark” option in your PC.\p"
+	"{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}Would you like me to set all Unmarked\n"
+	"Pokémon to level {STR_VAR_3}?"
+}
+
+text AreYouSureLevelCapBox
+{
+	"I will now set all Unmarked Pokémon in\n"
+	"your PC and Party to level {STR_VAR_3}.\p"
+	"Is that okay?"
+}
+
+text BoxHasBeenSetToLevelCap
+{
+	"All Unmarked Pokémon in your PC and\n"
+	"Party have been set to level {STR_VAR_3}.\p"
+	"Come again if you need something else."
+}
+
 text FeatureAvailableAfterMoveTutor
 {
 	"This feature will become available once\n"
@@ -429,7 +640,7 @@ text FeatureAvailableAfterMoveTutor
 
 text VersionNumber
 {
-	"Version: 1.2"
+	"Version: 1.3.1"
 }
 
 text EasyMode

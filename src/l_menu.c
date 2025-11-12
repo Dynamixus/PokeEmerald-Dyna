@@ -69,6 +69,7 @@ enum
     MENU_ACTION_FOLLOWERS_ON,
     MENU_ACTION_FOLLOWERS_OFF,
     MENU_ACTION_STAT_EDITOR,
+    MENU_ACTION_POKEVIAL2,
 };
 
 // IWRAM common
@@ -93,6 +94,7 @@ static bool8 LMenuTimeChangerCallback(void);
 static bool8 LMenuInfiniteRepelCallback(void);
 static bool8 LMenuPokeVialCallback(void);
 static bool8 StartMenuStatEditorCallback(void);
+static bool8 LMenuPokeVial2Callback(void);
 
 // Menu callbacks
 static bool8 HandleLMenuInput(void);
@@ -124,6 +126,7 @@ static const struct MenuAction sLMenuItems[] =
     [MENU_ACTION_FOLLOWERS_ON]          = {gText_FollowersOn,  {.u8_void = LMenuFollowersCallback}},
     [MENU_ACTION_FOLLOWERS_OFF]         = {gText_FollowersOff,  {.u8_void = LMenuFollowersCallback}},
     [MENU_ACTION_STAT_EDITOR]           = {gText_StatEditor, {.u8_void = StartMenuStatEditorCallback}},
+    [MENU_ACTION_POKEVIAL2]             = {gText_MenuPokeVial2, {.u8_void = LMenuPokeVial2Callback}},
 };
 
 // Local functions
@@ -140,11 +143,13 @@ static bool32 PrintLMenuActions(s8 *pIndex, u32 count);
 static bool32 InitLMenuStep(void);
 static void CreateLMenuTask(TaskFunc followupFunc);
 static void HideLMenuWindow(void);
+static void HideLMenuWindowPC(void);
 static void HideLMenuWindowAutoRun(void);
 static void HideLMenuWindowFollowers(void);
 static void HideLMenuWindowTimeChanger(void);
 static void HideLMenuWindowInfiniteRepel(void);
 static void HideLMenuWindowPokeVial(void);
+static void HideLMenuWindowPokeVial2(void);
 static void HideLMenuWindowNoWildMons(void);
 static void ShowTimeWindow(void);
 static void RemoveLMenuTimeWindow(void);
@@ -199,9 +204,13 @@ static void BuildNormalLMenu(void)
         {
             AddLMenuAction(MENU_ACTION_POKEVIAL);
         }
-        if(!FlagGet(FLAG_ENTERED_ELITE_4))
+        if(!FlagGet(FLAG_ENTERED_ELITE_4) && VarGet(VAR_HOT_HOUSE_STATE) == 0)
         {
             AddLMenuAction(MENU_ACTION_PC);
+        }
+        if(FlagGet(FLAG_ENTERED_ELITE_4) || VarGet(VAR_HOT_HOUSE_STATE) != 0)
+        {
+            AddLMenuAction(MENU_ACTION_POKEVIAL2);
         }
     }
 
@@ -211,7 +220,7 @@ static void BuildNormalLMenu(void)
         AddLMenuAction(MENU_ACTION_TIME_CHANGER);
     }
 
-    if(FlagGet(FLAG_SYS_STAT_EDITOR_GET) && !FlagGet(FLAG_ENTERED_ELITE_4))
+    if(FlagGet(FLAG_SYS_STAT_EDITOR_GET) && !FlagGet(FLAG_ENTERED_ELITE_4) && VarGet(VAR_HOT_HOUSE_STATE) == 0)
         AddLMenuAction(MENU_ACTION_STAT_EDITOR);
         
     if (hasDexNav)
@@ -302,9 +311,13 @@ static void BuildLinkModeLMenu(void)
         {
             AddLMenuAction(MENU_ACTION_POKEVIAL);
         }
-        if(!FlagGet(FLAG_ENTERED_ELITE_4))
+        if(!FlagGet(FLAG_ENTERED_ELITE_4) && VarGet(VAR_HOT_HOUSE_STATE) == 0)
         {
             AddLMenuAction(MENU_ACTION_PC);
+        }
+        if(FlagGet(FLAG_ENTERED_ELITE_4) || VarGet(VAR_HOT_HOUSE_STATE) != 0)
+        {
+            AddLMenuAction(MENU_ACTION_POKEVIAL2);
         }
     }
 
@@ -314,7 +327,7 @@ static void BuildLinkModeLMenu(void)
         AddLMenuAction(MENU_ACTION_TIME_CHANGER);
     }
 
-    if(FlagGet(FLAG_SYS_STAT_EDITOR_GET) && !FlagGet(FLAG_ENTERED_ELITE_4))
+    if(FlagGet(FLAG_SYS_STAT_EDITOR_GET) && !FlagGet(FLAG_ENTERED_ELITE_4) && VarGet(VAR_HOT_HOUSE_STATE) == 0)
         AddLMenuAction(MENU_ACTION_STAT_EDITOR);
         
     if (hasDexNav)
@@ -364,9 +377,13 @@ static void BuildUnionRoomLMenu(void)
         {
             AddLMenuAction(MENU_ACTION_POKEVIAL);
         }
-        if(!FlagGet(FLAG_ENTERED_ELITE_4))
+        if(!FlagGet(FLAG_ENTERED_ELITE_4) && VarGet(VAR_HOT_HOUSE_STATE) == 0)
         {
             AddLMenuAction(MENU_ACTION_PC);
+        }
+        if(FlagGet(FLAG_ENTERED_ELITE_4) || VarGet(VAR_HOT_HOUSE_STATE) != 0)
+        {
+            AddLMenuAction(MENU_ACTION_POKEVIAL2);
         }
     }
 
@@ -376,7 +393,7 @@ static void BuildUnionRoomLMenu(void)
         AddLMenuAction(MENU_ACTION_TIME_CHANGER);
     }
 
-    if(FlagGet(FLAG_SYS_STAT_EDITOR_GET) && !FlagGet(FLAG_ENTERED_ELITE_4))
+    if(FlagGet(FLAG_SYS_STAT_EDITOR_GET) && !FlagGet(FLAG_ENTERED_ELITE_4) && VarGet(VAR_HOT_HOUSE_STATE) == 0)
         AddLMenuAction(MENU_ACTION_STAT_EDITOR);
         
     if (hasDexNav)
@@ -730,22 +747,34 @@ static bool8 ShouldCallbackFadeToBlack(void)
         return FALSE;
     if(gMenuCallback2 == LMenuPokeVialCallback)
         return FALSE;
+    if(gMenuCallback2 == LMenuPokeVial2Callback)
+        return FALSE;
+    if(gMenuCallback2 == LMenuPCCallback)
+        return FALSE;
     
     return TRUE;
 }
 
-
-
 static bool8 LMenuPCCallback(void)
 {
-    if (!gPaletteFade.active)
-    {
-        PlayRainStoppingSoundEffect();
-		EnterPokeStorage(2);
-        return TRUE;
-    }
+    HideLMenuPC(); // Hide start menu
+    return TRUE;
+}
 
-    return FALSE;
+void HideLMenuPC(void)
+{
+    PlaySE(SE_SELECT);
+    HideLMenuWindowPC();
+}
+
+static void HideLMenuWindowPC(void)
+{
+    ClearStdWindowAndFrame(GetLMenuWindowId(), TRUE);
+    RemoveLMenuWindow();
+    RemoveLMenuTimeWindow();
+    ScriptUnfreezeObjectEvents();
+    UnlockPlayerFieldControls();
+    ScriptContext_SetupScript(EventScript_PCLMenu);
 }
 
 
@@ -924,6 +953,28 @@ static void HideLMenuWindowPokeVial(void)
     ScriptUnfreezeObjectEvents();
     UnlockPlayerFieldControls();
     ScriptContext_SetupScript(PokeVialHealScript);
+}
+
+static bool8 LMenuPokeVial2Callback(void)
+{
+    HideLMenuPokeVial2(); // Hide start menu
+    return TRUE;
+}
+
+void HideLMenuPokeVial2(void)
+{
+    PlaySE(SE_SELECT);
+    HideLMenuWindowPokeVial2();
+}
+
+static void HideLMenuWindowPokeVial2(void)
+{
+    ClearStdWindowAndFrame(GetLMenuWindowId(), TRUE);
+    RemoveLMenuWindow();
+    RemoveLMenuTimeWindow();
+    ScriptUnfreezeObjectEvents();
+    UnlockPlayerFieldControls();
+    ScriptContext_SetupScript(PokeVialHealScript2);
 }
 
 extern const u8 EventScript_NoWildMonsFound[];

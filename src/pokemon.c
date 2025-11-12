@@ -42,6 +42,7 @@
 #include "string_util.h"
 #include "strings.h"
 #include "task.h"
+#include "test_runner.h"
 #include "text.h"
 #include "trainer_hill.h"
 #include "util.h"
@@ -6851,7 +6852,7 @@ void HandleSetPokedexFlag(u16 nationalNum, u8 caseId, u32 personality)
 
 bool8 HasTwoFramesAnimation(u16 species)
 {
-    return P_TWO_FRAME_FRONT_SPRITES && species != SPECIES_UNOWN;
+    return P_TWO_FRAME_FRONT_SPRITES && species != SPECIES_UNOWN && !gTestRunnerHeadless;
 }
 
 static bool8 ShouldSkipFriendshipChange(void)
@@ -7295,6 +7296,45 @@ bool32 SpeciesHasGenderDifferences(u16 species)
     return FALSE;
 }
 
+bool32 IsRegionalForm(u16 speciesId)
+{
+    if (!P_REGIONAL_FORMS)
+        return FALSE;
+
+    const struct SpeciesInfo *species = &gSpeciesInfo[speciesId];
+    
+    if (species->isAlolanForm ||
+        species->isGalarianForm ||
+        species->isHisuianForm ||
+        species->isPaldeanForm)
+    {
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+bool32 HasRegionalForm(u16 speciesId)
+{
+    if (!P_REGIONAL_FORMS)
+        return FALSE;
+    
+    const struct SpeciesInfo *species = &gSpeciesInfo[speciesId];
+
+    if (!species->formSpeciesIdTable)
+        return FALSE;
+    
+    u32 i = 0;
+    while (species->formSpeciesIdTable[i] != FORM_SPECIES_END)
+    {
+        if (IsRegionalForm(species->formSpeciesIdTable[i]))
+            return TRUE;
+        i++;
+    }
+    
+    return FALSE;
+}
+
 bool32 TryFormChange(u32 monId, u32 side, u16 method)
 {
     struct Pokemon *party = (side == B_SIDE_PLAYER) ? gPlayerParty : gEnemyParty;
@@ -7468,7 +7508,7 @@ void HealBoxPokemon(struct BoxPokemon *boxMon)
 u16 GetCryIdBySpecies(u16 species)
 {
     species = SanitizeSpeciesId(species);
-    if (P_CRIES_ENABLED == FALSE || gSpeciesInfo[species].cryId >= CRY_COUNT)
+    if (P_CRIES_ENABLED == FALSE || gSpeciesInfo[species].cryId >= CRY_COUNT || gTestRunnerHeadless)
         return CRY_NONE;
     return gSpeciesInfo[species].cryId;
 }
@@ -7542,9 +7582,9 @@ void UpdateDaysPassedSinceFormChange(u16 days)
     }
 }
 
-u32 CheckDynamicMoveType(struct Pokemon *mon, u32 move, u32 battler)
+u32 CheckDynamicMoveType(struct Pokemon *mon, u32 move, u32 battler, bool32 state)
 {
-    u32 moveType = GetDynamicMoveType(mon, move, battler, NULL);
+    u32 moveType = GetDynamicMoveType(mon, move, battler, NULL, state);
     if (moveType != TYPE_NONE)
         return moveType;
     return gMovesInfo[move].type;

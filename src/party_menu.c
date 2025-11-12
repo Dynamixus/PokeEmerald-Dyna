@@ -8,6 +8,7 @@
 #include "battle_pike.h"
 #include "battle_pyramid.h"
 #include "battle_pyramid_bag.h"
+#include "battle_tower_team_preview.h"
 #include "bg.h"
 #include "bw_summary_screen.h"
 #include "contest.h"
@@ -30,6 +31,7 @@
 #include "frontier_util.h"
 #include "gpu_regs.h"
 #include "graphics.h"
+#include "hexorb.h" // hexorb Branch
 #include "international_string_util.h"
 #include "item.h"
 #include "item_menu.h"
@@ -114,6 +116,13 @@ enum {
     MENU_CATALOG_MOWER,
     MENU_CHANGE_FORM,
     MENU_CHANGE_ABILITY,
+    // Start hexorb Branch
+    MENU_INFLICT_SLEEP,
+    MENU_INFLICT_POISON,
+    MENU_INFLICT_BURN,
+    MENU_INFLICT_FREEZE_FROSTBITE,
+    MENU_INFLICT_PARALYSIS,
+    // End hexorb Branch
     MENU_FIELD_MOVES
 };
 
@@ -137,7 +146,8 @@ enum {
     ACTIONS_ZYGARDE_CUBE,
     ACTIONS_RELEARN_MOVES_BOTH,
     ACTIONS_RELEARN_MOVES_LVL_ONLY,
-    ACTIONS_RELEARN_MOVES_EGG_ONLY
+    ACTIONS_RELEARN_MOVES_EGG_ONLY,
+    ACTIONS_HEXORB, // hexorb Branch
 };
 
 // In CursorCb_FieldMove, field moves <= FIELD_MOVE_WATERFALL are assumed to line up with the badge flags.
@@ -246,7 +256,7 @@ EWRAM_DATA u8 gSelectedMonPartyId = 0;
 EWRAM_DATA MainCallback gPostMenuFieldCallback = NULL;
 static EWRAM_DATA u16 *sSlot1TilemapBuffer = 0; // for switching party slots
 static EWRAM_DATA u16 *sSlot2TilemapBuffer = 0; //
-EWRAM_DATA u8 gSelectedOrderFromParty[MAX_FRONTIER_PARTY_SIZE] = {0};
+EWRAM_DATA u8 gSelectedOrderFromParty[FRONTIER_PARTY_SIZE_FULL] = {0};
 static EWRAM_DATA u16 sPartyMenuItemId = 0;
 EWRAM_DATA u8 gBattlePartyCurrentOrder[PARTY_SIZE / 2] = {0}; // bits 0-3 are the current pos of Slot 1, 4-7 are Slot 2, and so on
 static EWRAM_DATA u8 sInitialLevel = 0;
@@ -433,10 +443,10 @@ static void Task_HandleStopLearningMoveYesNoInput(u8);
 static void Task_TryLearningNextMoveAfterText(u8);
 static void BufferMonStatsToTaskData(struct Pokemon *, s16 *);
 static void UpdateMonDisplayInfoAfterRareCandy(u8, struct Pokemon *);
-static void Task_DisplayLevelUpStatsPg1(u8);
-static void DisplayLevelUpStatsPg1(u8);
-static void Task_DisplayLevelUpStatsPg2(u8);
-static void DisplayLevelUpStatsPg2(u8);
+//static void Task_DisplayLevelUpStatsPg1(u8);
+//static void DisplayLevelUpStatsPg1(u8);
+//static void Task_DisplayLevelUpStatsPg2(u8);
+//static void DisplayLevelUpStatsPg2(u8);
 static void Task_TryLearnNewMoves(u8);
 static void PartyMenuTryEvolution(u8);
 static void DisplayMonNeedsToReplaceMove(u8);
@@ -462,6 +472,7 @@ static u8 GetBattleEntryLevelCap(void);
 static u8 GetMaxBattleEntries(void);
 static u8 GetMinBattleEntries(void);
 static void Task_ContinueChoosingHalfParty(u8);
+static void Task_DisplayPartyWaitForClose(u8 taskId);
 static void BufferBattlePartyOrder(u8 *, bool8);
 static void BufferBattlePartyOrderBySide(u8 *, u8, u8);
 static void Task_InitMultiPartnerPartySlideIn(u8);
@@ -473,8 +484,12 @@ static void Task_PartyMenuWaitForFade(u8 taskId);
 static void Task_ChooseContestMon(u8 taskId);
 static void CB2_ChooseContestMon(void);
 static void Task_ChoosePartyMon(u8 taskId);
+static void Task_DisplayPartyForTeamPreview(u8 taskId);
+static void Task_LoadOpponentPartyIntoPlayerParty(u8 taskId);
+static void Task_ReloadPlayerParty(u8 taskId);
 static void Task_ChooseMonForMoveRelearner(u8);
 static void CB2_ChooseMonForMoveRelearner(void);
+static void CB2_DisplayPartyReturn(void);
 static void Task_BattlePyramidChooseMonHeldItems(u8);
 static void ShiftMoveSlot(struct Pokemon*, u8, u8);
 static void BlitBitmapToPartyWindow_LeftColumn(u8, u8, u8, u8, u8, u8);
@@ -520,6 +535,13 @@ static bool8 SetUpFieldMove_Dive(void);
 void TryItemHoldFormChange(struct Pokemon *mon);
 static void ShowMoveSelectWindow(u8 slot);
 static void Task_HandleWhichMoveInput(u8 taskId);
+// Start hexorb Branch
+static void TryHexorbAndPrintResult(u8);
+static void DisplayHexorbResult(u8, u32, enum HexorbResultCodes, struct Pokemon*);
+static void Task_RetryHexorbAfterFailedStatus(u8);
+static void Task_RetryHexorbAfterFailedMon(u8);
+static void DisplayHexorbMessageAndScheduleTask(u8, const u8*, TaskFunc, bool32);
+// End hexorb Branch
 
 // static const data
 #include "data/party_menu.h"
@@ -2825,6 +2847,11 @@ void DisplayPartyMenuStdMessage(u32 stringId)
         case PARTY_MSG_WHICH_TYPE_RELEARN:
             *windowPtr = AddWindow(&sWhichTypeRelearnWindowTemplate);
             break;
+            // Start hexorb Branch
+        case PARTY_MSG_WHICH_STATUS:
+            *windowPtr = AddWindow(&sInflictWhichStatusMsgWindowTemplate);
+            break;
+            // End hexorb Branch
         default:
             *windowPtr = AddWindow(&sDefaultPartyMsgWindowTemplate);
             break;
@@ -2893,6 +2920,11 @@ static u8 DisplaySelectionWindow(u8 windowType)
     case SELECTWINDOW_MOVE_RELEARN_ONE:
         window = sRelearnOneOptionsWindowTemplate;
         break;
+        // Start hexorb Branch
+    case SELECTWINDOW_HEXORB:
+        window = sHexorbSelectWindowTemplate;
+        break;
+        // End hexorb Branch
     default: // SELECTWINDOW_MOVES
         window = sMoveSelectWindowTemplate;
         break;
@@ -2935,18 +2967,18 @@ static void PartyMenuDisplayYesNoMenu(void)
     CreateYesNoMenu(&sPartyMenuYesNoWindowTemplate, 0x4F, 13, 0);
 }
 
-static u8 CreateLevelUpStatsWindow(void)
-{
-    sPartyMenuInternal->windowId[0] = AddWindow(&sLevelUpStatsWindowTemplate);
-    DrawStdFrameWithCustomTileAndPalette(sPartyMenuInternal->windowId[0], FALSE, 0x4F, 13);
-    return sPartyMenuInternal->windowId[0];
-}
+// static u8 CreateLevelUpStatsWindow(void)
+// {
+//     sPartyMenuInternal->windowId[0] = AddWindow(&sLevelUpStatsWindowTemplate);
+//     DrawStdFrameWithCustomTileAndPalette(sPartyMenuInternal->windowId[0], FALSE, 0x4F, 13);
+//     return sPartyMenuInternal->windowId[0];
+// }
 
-static void RemoveLevelUpStatsWindow(void)
-{
-    ClearWindowTilemap(sPartyMenuInternal->windowId[0]);
-    PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
-}
+// static void RemoveLevelUpStatsWindow(void)
+// {
+//     ClearWindowTilemap(sPartyMenuInternal->windowId[0]);
+//     PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
+// }
 
 static void SetPartyMonSelectionActions(struct Pokemon *mons, u8 slotId, u8 action)
 {
@@ -4225,6 +4257,11 @@ static void CursorCb_FieldMove(u8 taskId)
         if (fieldMove <= FIELD_MOVE_WATERFALL && FlagGet(FLAG_BADGE01_GET + fieldMove) != TRUE)
         {
             DisplayPartyMenuMessage(gText_CantUseUntilNewBadge, TRUE);
+            gTasks[taskId].func = Task_ReturnToChooseMonAfterText;
+        }
+        else if (fieldMove == FIELD_MOVE_SURF && !CheckBagHasItem(ITEM_HM03, 1))
+        {
+            DisplayPartyMenuMessage(gText_CantUseUntilHaveHM, TRUE);
             gTasks[taskId].func = Task_ReturnToChooseMonAfterText;
         }
         else if (sFieldMoveCursorCallbacks[fieldMove].fieldMoveFunc() == TRUE)
@@ -5968,7 +6005,9 @@ void ItemUseCB_RareCandy(u8 taskId, TaskFunc task)
 
             DisplayPartyMenuMessage(gStringVar4, TRUE);
             ScheduleBgCopyTilemapToVram(2);
-            gTasks[taskId].func = Task_DisplayLevelUpStatsPg1;
+
+            sInitialLevel += 1; // so the Pokemon doesn't learn a move meant for its previous level
+            gTasks[taskId].func = Task_TryLearnNewMoves;
         }
         else
         {
@@ -5996,53 +6035,54 @@ static void UpdateMonDisplayInfoAfterRareCandy(u8 slot, struct Pokemon *mon)
     ScheduleBgCopyTilemapToVram(0);
 }
 
-static void Task_DisplayLevelUpStatsPg1(u8 taskId)
-{
-    if (WaitFanfare(FALSE) && IsPartyMenuTextPrinterActive() != TRUE && ((JOY_NEW(A_BUTTON)) || (JOY_NEW(B_BUTTON))))
-    {
-        PlaySE(SE_SELECT);
-        DisplayLevelUpStatsPg1(taskId);
-        gTasks[taskId].func = Task_DisplayLevelUpStatsPg2;
-    }
-}
+// static void Task_DisplayLevelUpStatsPg1(u8 taskId)
+// {
+//     if (WaitFanfare(FALSE) && IsPartyMenuTextPrinterActive() != TRUE && ((JOY_NEW(A_BUTTON)) || (JOY_NEW(B_BUTTON))))
+//     {
+//         PlaySE(SE_SELECT);
+//         DisplayLevelUpStatsPg1(taskId);
+//         gTasks[taskId].func = Task_DisplayLevelUpStatsPg2;
+//     }
+// }
 
-static void Task_DisplayLevelUpStatsPg2(u8 taskId)
-{
-    if ((JOY_NEW(A_BUTTON)) || (JOY_NEW(B_BUTTON)))
-    {
-        PlaySE(SE_SELECT);
-        DisplayLevelUpStatsPg2(taskId);
-        sInitialLevel += 1; // so the Pokemon doesn't learn a move meant for its previous level
-        gTasks[taskId].func = Task_TryLearnNewMoves;
-    }
-}
+// static void Task_DisplayLevelUpStatsPg2(u8 taskId)
+// {
+//     if ((JOY_NEW(A_BUTTON)) || (JOY_NEW(B_BUTTON)))
+//     {
+//         PlaySE(SE_SELECT);
+//         DisplayLevelUpStatsPg2(taskId);
+//         sInitialLevel += 1; // so the Pokemon doesn't learn a move meant for its previous level
+//         gTasks[taskId].func = Task_TryLearnNewMoves;
+//     }
+// }
 
-static void DisplayLevelUpStatsPg1(u8 taskId)
-{
-    u16 *arrayPtr = (u16*) sPartyMenuInternal->data;
+// static void DisplayLevelUpStatsPg1(u8 taskId)
+// {
+//     u16 *arrayPtr = (u16*) sPartyMenuInternal->data;
 
-    arrayPtr[12] = CreateLevelUpStatsWindow();
-    DrawLevelUpWindowPg1(arrayPtr[12], arrayPtr, &arrayPtr[6], TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY);
-    CopyWindowToVram(arrayPtr[12], COPYWIN_GFX);
-    ScheduleBgCopyTilemapToVram(2);
-}
+//     arrayPtr[12] = CreateLevelUpStatsWindow();
+//     DrawLevelUpWindowPg1(arrayPtr[12], arrayPtr, &arrayPtr[6], TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY);
+//     CopyWindowToVram(arrayPtr[12], COPYWIN_GFX);
+//     ScheduleBgCopyTilemapToVram(2);
+// }
 
-static void DisplayLevelUpStatsPg2(u8 taskId)
-{
-    u16 *arrayPtr = (u16*) sPartyMenuInternal->data;
+// static void DisplayLevelUpStatsPg2(u8 taskId)
+// {
+//     u16 *arrayPtr = (u16*) sPartyMenuInternal->data;
 
-    DrawLevelUpWindowPg2(arrayPtr[12], &arrayPtr[6], TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY);
-    CopyWindowToVram(arrayPtr[12], COPYWIN_GFX);
-    ScheduleBgCopyTilemapToVram(2);
-}
+//     DrawLevelUpWindowPg2(arrayPtr[12], &arrayPtr[6], TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY);
+//     CopyWindowToVram(arrayPtr[12], COPYWIN_GFX);
+//     ScheduleBgCopyTilemapToVram(2);
+// }
 
 static void Task_TryLearnNewMoves(u8 taskId)
 {
     u16 learnMove;
 
-    if (WaitFanfare(FALSE) && ((JOY_NEW(A_BUTTON)) || (JOY_NEW(B_BUTTON))))
+    if (WaitFanfare(FALSE) && IsPartyMenuTextPrinterActive() != TRUE && ((JOY_NEW(A_BUTTON)) || (JOY_NEW(B_BUTTON))))
     {
-        RemoveLevelUpStatsWindow();
+        PlaySE(SE_SELECT);
+        //RemoveLevelUpStatsWindow();
         for (; sInitialLevel <= sFinalLevel; sInitialLevel++)
         {
             SetMonData(&gPlayerParty[gPartyMenu.slotId], MON_DATA_LEVEL, &sInitialLevel);
@@ -6967,6 +7007,10 @@ u8 GetItemEffectType(u16 item)
         return ITEM_EFFECT_SACRED_ASH;
     else if (itemEffect[3] & ITEM3_LEVEL_UP)
         return ITEM_EFFECT_RAISE_LEVEL;
+    // Start hexorb Branch
+    else if (itemEffect[0] & ITEM0_HEXORB)
+        return ITEM_EFFECT_HEXORB;
+    // End hexorb Branch
 
     statusCure = itemEffect[3] & ITEM3_STATUS_ALL;
     if (statusCure || (itemEffect[0] >> 7))
@@ -7975,6 +8019,60 @@ static void CB2_ChooseContestMon(void)
     SetMainCallback2(CB2_ReturnToField);
 }
 
+void DisplayPartyForTeamPreview(void)
+{
+    LockPlayerFieldControls();
+    FadeScreen(FADE_TO_BLACK, 0);
+    CreateTask(Task_DisplayPartyForTeamPreview, 10);
+}
+
+void Task_DisplayPartyForTeamPreview(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        CleanupOverworldWindowsAndTilemaps();
+        InitPartyMenu(PARTY_MENU_TYPE_FIELD, PARTY_LAYOUT_SINGLE, PARTY_ACTION_CANT_SWITCH, FALSE, PARTY_MSG_TEAM_PREVIEW, Task_DisplayPartyWaitForClose, CB2_DisplayPartyReturn);
+        DestroyTask(taskId);
+    }
+}
+
+static void Task_DisplayPartyWaitForClose(u8 taskId)
+{
+    if (JOY_NEW(B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        Task_ClosePartyMenu(taskId);
+    }
+}
+
+static void CB2_DisplayPartyReturn(void)
+{
+    gFieldCallback2 = CB2_FadeFromPartyMenu;
+    SetMainCallback2(CB2_ReturnToField);
+}
+
+void LoadOpponentPartyIntoPlayerParty(void)
+{
+    LockPlayerFieldControls();
+    CreateTask(Task_LoadOpponentPartyIntoPlayerParty, 10);
+}
+
+static void Task_LoadOpponentPartyIntoPlayerParty(u8 taskId) {
+    LoadOpponentTeamIntoPlayerParty();
+    DestroyTask(taskId);
+}
+
+void ReloadPlayerParty(void)
+{
+    LockPlayerFieldControls();
+    CreateTask(Task_ReloadPlayerParty, 10);
+}
+
+static void Task_ReloadPlayerParty(u8 taskId) {
+    RestorePlayerParty();
+    DestroyTask(taskId);
+}
+
 // Used as a script special for showing a party mon to various npcs (e.g. in-game trades, move deleter)
 void ChoosePartyMon(void)
 {
@@ -8177,3 +8275,106 @@ void ItemUseCB_PokeBall(u8 taskId, TaskFunc task)
         gTasks[taskId].func = task;
     }
 }
+
+// Start hexorb Branch
+static void DisplayHexorbMessageAndScheduleTask(u8 taskId, const u8* message, TaskFunc nextTask, bool32 useExitCallback)
+{
+    gPartyMenuUseExitCallback = useExitCallback;
+    DisplayPartyMenuMessage(message, TRUE);
+    ScheduleBgCopyTilemapToVram(2);
+    gTasks[taskId].func = nextTask;
+}
+
+void ItemUseCB_UseHexorb(u8 taskId, TaskFunc task)
+{
+    struct Pokemon *mon = &gPlayerParty[gPartyMenu.slotId];
+
+    if (!GetMonData(mon, MON_DATA_HP))
+    {
+        DisplayHexorbResult(taskId, 0, HEXORB_RESULT_FAIL_FAINTED, mon);
+        return;
+    }
+
+    SetPartyMonSelectionActions(gPlayerParty, gPartyMenu.slotId, ACTIONS_HEXORB);
+    DisplaySelectionWindow(SELECTWINDOW_HEXORB);
+    DisplayPartyMenuStdMessage(PARTY_MSG_WHICH_STATUS);
+    gTasks[taskId].data[0] = TASK_NONE;
+    gTasks[taskId].func = Task_HandleSelectionMenuInput;
+}
+
+static void TryHexorbAndPrintResult(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+    u32 status = Hexorb_ConvertMenuPosToStatus(data[0]);
+    struct Pokemon *mon = &gPlayerParty[gPartyMenu.slotId];
+    enum HexorbResultCodes result = (Hexorb_TryInflictStatus(mon, status));
+
+    PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
+    PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[1]);
+
+    DisplayHexorbResult(taskId, status, result, mon);
+}
+
+static void DisplayHexorbResult(u8 taskId, u32 status, enum HexorbResultCodes result, struct Pokemon* mon)
+{
+    switch (result)
+    {
+        case HEXORB_RESULT_SUCCESS:
+            UpdateMonDisplayInfoAfterRareCandy(gPartyMenu.slotId, mon);
+            PlayCry_ByMode(GetMonData(mon, MON_DATA_SPECIES), 0, CRY_MODE_WEAK);
+            Hexorb_ConstructSuccessMessage(mon, status);
+            DisplayHexorbMessageAndScheduleTask(taskId, gStringVar4, Task_ClosePartyMenuAfterText, TRUE);
+            break;
+        case HEXORB_RESULT_FAIL_ABILITY:
+            PlaySE(SE_SELECT);
+            Hexorb_ConstructAbilityFailureMessage(mon,status);
+            DisplayHexorbMessageAndScheduleTask(taskId, gStringVar4, Task_RetryHexorbAfterFailedStatus, FALSE);
+            break;
+        case HEXORB_RESULT_FAIL_TYPE_0:
+        case HEXORB_RESULT_FAIL_TYPE_1:
+            gPartyMenuUseExitCallback = FALSE;
+            PlaySE(SE_SELECT);
+            Hexorb_ConstructTypeFailureMessage(mon, status, result);
+            DisplayHexorbMessageAndScheduleTask(taskId, gStringVar4, Task_RetryHexorbAfterFailedStatus, FALSE);
+            break;
+        case HEXORB_RESULT_FAIL_HAS_STATUS:
+            PlaySE(SE_SELECT);
+            Hexorb_ConstructStatusFailureMessage(mon);
+            DisplayHexorbMessageAndScheduleTask(taskId, gStringVar4, Task_RetryHexorbAfterFailedMon, FALSE);
+            break;
+        default:
+        case HEXORB_RESULT_FAIL_FAINTED:
+            PlaySE(SE_SELECT);
+            Hexorb_ConstructStatusFailureMessage(mon);
+            DisplayHexorbMessageAndScheduleTask(taskId, gText_WontHaveEffect, Task_RetryHexorbAfterFailedMon, FALSE);
+            break;
+    }
+}
+
+static void Task_RetryHexorbAfterFailedStatus(u8 taskId)
+{
+    if (!JOY_NEW(A_BUTTON | B_BUTTON))
+        return;
+
+    ClearDialogWindowAndFrame(WIN_MSG,FALSE);
+    PlaySE(SE_SELECT);
+    ItemUseCB_UseHexorb(taskId, Task_HandleSelectionMenuInput);
+}
+
+static void Task_RetryHexorbAfterFailedMon(u8 taskId)
+{
+    if (!JOY_NEW(A_BUTTON | B_BUTTON))
+        return;
+
+    ClearDialogWindowAndFrame(WIN_MSG,FALSE);
+    DisplayPartyMenuStdMessage(PARTY_MSG_USE_ON_WHICH_MON);
+    PlaySE(SE_SELECT);
+    gTasks[taskId].func = Task_HandleChooseMonInput;
+}
+
+void InitPartyMenuForItemUseFromField(u8 taskId)
+{
+    InitPartyMenu(PARTY_MENU_TYPE_FIELD, PARTY_LAYOUT_SINGLE, PARTY_ACTION_USE_ITEM, TRUE, PARTY_MSG_USE_ON_WHICH_MON, Task_HandleChooseMonInput, CB2_ReturnToField);
+}
+// End hexorb Branch
+

@@ -35,25 +35,13 @@
 #include "confetti_util.h"
 #include "randomizer.h"
 #include "constants/rgb.h"
+#include "constants/abilities.h"
+#include "constants/items.h"
+#include "constants/form_change_types.h"
 #include "constants/game_settings.h"
 
 #define HALL_OF_FAME_MAX_TEAMS 30
 #define TAG_CONFETTI 1001
-
-struct HallofFameMon
-{
-    u32 tid;
-    u32 personality;
-    u16 isShiny:1;
-    u16 species:15;
-    u8 lvl;
-    u8 nickname[POKEMON_NAME_LENGTH];
-};
-
-struct HallofFameTeam
-{
-    struct HallofFameMon mon[PARTY_SIZE];
-};
 
 STATIC_ASSERT(sizeof(struct HallofFameTeam) * HALL_OF_FAME_MAX_TEAMS <= SECTOR_DATA_SIZE * NUM_HOF_SECTORS, HallOfFameFreeSpace);
 
@@ -68,6 +56,7 @@ struct HofGfx
 static EWRAM_DATA u32 sHofFadePalettes = 0;
 static EWRAM_DATA struct HallofFameTeam *sHofMonPtr = NULL;
 static EWRAM_DATA struct HofGfx *sHofGfxPtr = NULL;
+EWRAM_DATA struct HallofFameTeam *gHoFSaveBuffer = NULL;
 
 static void ClearVramOamPltt_LoadHofPal(void);
 static void LoadHofGfx(void);
@@ -418,13 +407,19 @@ static bool8 InitHallOfFameScreen(void)
 #define tPlayerSpriteID     data[4]
 #define tMonSpriteId(i)     data[i + 5]
 
+static void AllocateHoFTeams(void)
+{
+    sHofMonPtr = AllocZeroed(sizeof(*sHofMonPtr));
+    gHoFSaveBuffer = Alloc(SECTOR_SIZE * NUM_HOF_SECTORS);
+}
+
 void CB2_DoHallOfFameScreen(void)
 {
     if (!InitHallOfFameScreen())
     {
         u8 taskId = CreateTask(Task_Hof_InitMonData, 0);
         gTasks[taskId].tDontSaveData = FALSE;
-        sHofMonPtr = AllocZeroed(sizeof(*sHofMonPtr));
+        AllocateHoFTeams();
     }
 }
 
@@ -434,8 +429,57 @@ void CB2_DoHallOfFameScreenDontSaveData(void)
     {
         u8 taskId = CreateTask(Task_Hof_InitMonData, 0);
         gTasks[taskId].tDontSaveData = TRUE;
-        sHofMonPtr = AllocZeroed(sizeof(*sHofMonPtr));
+        AllocateHoFTeams();
     }
+}
+
+static u16 GetHallOfFameFormChangeSpecies(struct Pokemon *mon)
+{
+    u16 species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG);
+    u16 ability = GetMonAbility(mon);
+    u16 targetSpecies = species;
+    const struct FormChange *formChanges = GetSpeciesFormChanges(species);
+
+    for (u8 i = 0; formChanges != NULL && formChanges[i].method != FORM_CHANGE_TERMINATOR; i++)
+    {
+        switch (formChanges[i].method)
+        {
+        case FORM_CHANGE_BATTLE_MEGA_EVOLUTION_ITEM:
+        case FORM_CHANGE_BATTLE_PRIMAL_REVERSION:
+        case FORM_CHANGE_BATTLE_ULTRA_BURST:
+        case FORM_CHANGE_ITEM_HOLD:
+        case FORM_CHANGE_BEGIN_BATTLE:
+            if (formChanges[i].param1 == GetMonData(mon, MON_DATA_HELD_ITEM))
+                targetSpecies = formChanges[i].targetSpecies;
+            break;
+
+        case FORM_CHANGE_BATTLE_MEGA_EVOLUTION_MOVE:
+            for (u8 j = 0; j < MAX_MON_MOVES; j++)
+            {
+                u16 move = GetMonData(mon, MON_DATA_MOVE1 + j);
+                if (formChanges[i].param1 == move)
+                    targetSpecies =  formChanges[i].targetSpecies;
+            }
+            break;
+
+        case FORM_CHANGE_BATTLE_HP_PERCENT:
+            if (formChanges[i].param1 == ability
+                && formChanges[i].param2 == HP_LOWER_EQ_THAN // the lower than form is always the cool one
+                && formChanges[i].param3 == 50) // unless its 25% for Wishiwashi
+                targetSpecies =  formChanges[i].targetSpecies;
+            break;
+
+        case FORM_CHANGE_BATTLE_SWITCH:
+            if (formChanges[i].param1 == ability || formChanges[i].param1 == ABILITY_NONE)
+                targetSpecies =  formChanges[i].targetSpecies;
+            break;
+                
+        default:
+            break;
+        }
+    }
+
+    return targetSpecies;
 }
 
 static void Task_Hof_InitMonData(u8 taskId)
@@ -449,7 +493,7 @@ static void Task_Hof_InitMonData(u8 taskId)
         u8 nickname[POKEMON_NAME_LENGTH + 1];
         if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES))
         {
-            sHofMonPtr->mon[i].species = GetMonData(&gPlayerParty[i], MON_DATA_SPECIES_OR_EGG);
+            sHofMonPtr->mon[i].species = GetHallOfFameFormChangeSpecies(&gPlayerParty[i]);
             sHofMonPtr->mon[i].tid = GetMonData(&gPlayerParty[i], MON_DATA_OT_ID);
             sHofMonPtr->mon[i].isShiny = GetMonData(&gPlayerParty[i], MON_DATA_IS_SHINY);
             sHofMonPtr->mon[i].personality = GetMonData(&gPlayerParty[i], MON_DATA_PERSONALITY);
@@ -488,16 +532,16 @@ static void Task_Hof_InitMonData(u8 taskId)
 static void Task_Hof_InitTeamSaveData(u8 taskId)
 {
     u16 i;
-    struct HallofFameTeam *lastSavedTeam = (struct HallofFameTeam *)(gDecompressionBuffer);
+    struct HallofFameTeam *lastSavedTeam = gHoFSaveBuffer;
 
     if (!gHasHallOfFameRecords)
     {
-        memset(gDecompressionBuffer, 0, SECTOR_SIZE * NUM_HOF_SECTORS);
+        memset(gHoFSaveBuffer, 0, SECTOR_SIZE * NUM_HOF_SECTORS);
     }
     else
     {
         if (LoadGameSave(SAVE_HALL_OF_FAME) != SAVE_STATUS_OK)
-            memset(gDecompressionBuffer, 0, SECTOR_SIZE * NUM_HOF_SECTORS);
+            memset(gHoFSaveBuffer, 0, SECTOR_SIZE * NUM_HOF_SECTORS);
     }
 
     for (i = 0; i < HALL_OF_FAME_MAX_TEAMS; i++, lastSavedTeam++)
@@ -507,8 +551,8 @@ static void Task_Hof_InitTeamSaveData(u8 taskId)
     }
     if (i >= HALL_OF_FAME_MAX_TEAMS)
     {
-        struct HallofFameTeam *afterTeam = (struct HallofFameTeam *)(gDecompressionBuffer);
-        struct HallofFameTeam *beforeTeam = (struct HallofFameTeam *)(gDecompressionBuffer);
+        struct HallofFameTeam *afterTeam = gHoFSaveBuffer;
+        struct HallofFameTeam *beforeTeam = gHoFSaveBuffer;
         afterTeam++;
         for (i = 0; i < HALL_OF_FAME_MAX_TEAMS - 1; i++, beforeTeam++, afterTeam++)
         {
@@ -524,6 +568,13 @@ static void Task_Hof_InitTeamSaveData(u8 taskId)
     gTasks[taskId].func = Task_Hof_TrySaveData;
 }
 
+static void FreeAllHoFMem(void)
+{
+    TRY_FREE_AND_SET_NULL(sHofGfxPtr);
+    TRY_FREE_AND_SET_NULL(sHofMonPtr);
+    TRY_FREE_AND_SET_NULL(gHoFSaveBuffer);
+}
+
 static void Task_Hof_TrySaveData(u8 taskId)
 {
     gGameContinueCallback = CB2_DoHallOfFameScreenDontSaveData;
@@ -533,8 +584,7 @@ static void Task_Hof_TrySaveData(u8 taskId)
         UnsetBgTilemapBuffer(3);
         FreeAllWindowBuffers();
 
-        TRY_FREE_AND_SET_NULL(sHofGfxPtr);
-        TRY_FREE_AND_SET_NULL(sHofMonPtr);
+        FreeAllHoFMem();
 
         DestroyTask(taskId);
     }
@@ -774,10 +824,7 @@ static void Task_Hof_HandleExit(u8 taskId)
         UnsetBgTilemapBuffer(3);
         ResetBgsAndClearDma3BusyFlags(0);
         DestroyTask(taskId);
-
-        TRY_FREE_AND_SET_NULL(sHofGfxPtr);
-        TRY_FREE_AND_SET_NULL(sHofMonPtr);
-
+        FreeAllHoFMem();
         StartCredits();
     }
 }
@@ -809,6 +856,7 @@ void CB2_DoHallOfFamePC(void)
         SetVBlankCallback(NULL);
         ClearVramOamPltt_LoadHofPal();
         sHofGfxPtr = AllocZeroed(sizeof(*sHofGfxPtr));
+        AllocateHoFTeams();
         gMain.state = 1;
         break;
     case 1:
@@ -825,7 +873,7 @@ void CB2_DoHallOfFamePC(void)
     case 3:
         if (!LoadHofBgs())
         {
-            struct HallofFameTeam *fameTeam = (struct HallofFameTeam *)(gDecompressionBuffer);
+            struct HallofFameTeam *fameTeam = gHoFSaveBuffer;
             fameTeam->mon[0] = sDummyFameMon;
             ComputerScreenOpenEffect(0, 0, 0);
             SetVBlankCallback(VBlankCB_HallOfFame);
@@ -854,7 +902,6 @@ void CB2_DoHallOfFamePC(void)
                 gTasks[taskId].tMonSpriteId(i) = SPRITE_NONE;
             }
 
-            sHofMonPtr = AllocZeroed(SECTOR_SIZE * NUM_HOF_SECTORS);
             SetMainCallback2(CB2_HallOfFame);
         }
         break;
@@ -873,8 +920,7 @@ static void Task_HofPC_CopySaveData(u8 taskId)
         u16 i;
         struct HallofFameTeam *savedTeams;
 
-        CpuCopy16(gDecompressionBuffer, sHofMonPtr, SECTOR_SIZE * NUM_HOF_SECTORS);
-        savedTeams = sHofMonPtr;
+        savedTeams = gHoFSaveBuffer;
         for (i = 0; i < HALL_OF_FAME_MAX_TEAMS; i++, savedTeams++)
         {
             if (savedTeams->mon[0].species == SPECIES_NONE)
@@ -894,7 +940,7 @@ static void Task_HofPC_CopySaveData(u8 taskId)
 
 static void Task_HofPC_DrawSpritesPrintText(u8 taskId)
 {
-    struct HallofFameTeam *savedTeams = sHofMonPtr;
+    struct HallofFameTeam *savedTeams = gHoFSaveBuffer;
     struct HallofFameMon* currMon;
     u16 i;
 
@@ -960,7 +1006,7 @@ static void Task_HofPC_DrawSpritesPrintText(u8 taskId)
 
 static void Task_HofPC_PrintMonInfo(u8 taskId)
 {
-    struct HallofFameTeam *savedTeams = sHofMonPtr;
+    struct HallofFameTeam *savedTeams = gHoFSaveBuffer;
     struct HallofFameMon* currMon;
     u16 i;
     u16 currMonID;
@@ -1049,7 +1095,7 @@ static void Task_HofPC_HandlePaletteOnExit(u8 taskId)
     struct HallofFameTeam *fameTeam;
 
     CpuCopy16(gPlttBufferFaded, gPlttBufferUnfaded, PLTT_SIZE);
-    fameTeam = (struct HallofFameTeam *)(gDecompressionBuffer);
+    fameTeam = gHoFSaveBuffer;
     fameTeam->mon[0] = sDummyFameMon;
     ComputerScreenCloseEffect(0, 0, 0);
     gTasks[taskId].func = Task_HofPC_HandleExit;
@@ -1059,7 +1105,7 @@ static void Task_HofPC_HandleExit(u8 taskId)
 {
     if (!IsComputerScreenCloseEffectActive())
     {
-        u8 i;
+        s32 i;
 
         for (i = 0; i < PARTY_SIZE; i++)
         {
@@ -1081,8 +1127,7 @@ static void Task_HofPC_HandleExit(u8 taskId)
         ResetBgsAndClearDma3BusyFlags(0);
         DestroyTask(taskId);
 
-        TRY_FREE_AND_SET_NULL(sHofGfxPtr);
-        TRY_FREE_AND_SET_NULL(sHofMonPtr);
+        FreeAllHoFMem();
 
         ReturnFromHallOfFamePC();
     }
@@ -1127,6 +1172,24 @@ static void HallOfFame_PrintWelcomeText(u8 unusedPossiblyWindowId, u8 unused2)
             AddTextPrinterParameterized3(0, FONT_NORMAL, GetStringCenterAlignXOffset(FONT_NORMAL, gText_WelcomeToHOFNormalMGM, 0xD0), 1, sMonInfoTextColors, 0, gText_WelcomeToHOFNormalMGM);
         else
             AddTextPrinterParameterized3(0, FONT_NORMAL, GetStringCenterAlignXOffset(FONT_NORMAL, gText_WelcomeToHOFNormalNoMGM, 0xD0), 1, sMonInfoTextColors, 0, gText_WelcomeToHOFNormalNoMGM);
+    }
+    else if(VarGet(VAR_GAME_SETTING_DIFFICULTY_MODE) == GAME_SETTING_DIFFICULTY_HARD_MODE)
+    {
+        if(FlagGet(FLAG_MIN_GRINDING_MODE))
+            AddTextPrinterParameterized3(0, FONT_NORMAL, GetStringCenterAlignXOffset(FONT_NORMAL, gText_WelcomeToHOFHardNoMGM, 0xD0), 1, sMonInfoTextColors, 0, gText_WelcomeToHOFHardNoMGM);
+        else
+            AddTextPrinterParameterized3(0, FONT_NORMAL, GetStringCenterAlignXOffset(FONT_NORMAL, gText_WelcomeToHOFHardNoMGM, 0xD0), 1, sMonInfoTextColors, 0, gText_WelcomeToHOFHardNoMGM);
+    }
+    else if(VarGet(VAR_GAME_SETTING_DIFFICULTY_MODE) == GAME_SETTING_DIFFICULTY_VANILLA_MODE)
+    {
+        if(FlagGet(FLAG_MIN_GRINDING_MODE))
+            AddTextPrinterParameterized3(0, FONT_NORMAL, GetStringCenterAlignXOffset(FONT_NORMAL, gText_WelcomeToHOFVanillaMGM, 0xD0), 1, sMonInfoTextColors, 0, gText_WelcomeToHOFVanillaMGM);
+        else
+            AddTextPrinterParameterized3(0, FONT_NORMAL, GetStringCenterAlignXOffset(FONT_NORMAL, gText_WelcomeToHOFVanillaNoMGM, 0xD0), 1, sMonInfoTextColors, 0, gText_WelcomeToHOFVanillaNoMGM);
+    }
+    else if(VarGet(VAR_GAME_SETTING_DIFFICULTY_MODE) == GAME_SETTING_DIFFICULTY_HOF_MODE)
+    {
+        AddTextPrinterParameterized3(0, FONT_NORMAL, GetStringCenterAlignXOffset(FONT_NORMAL, gText_WelcomeToHOFHOF, 0xD0), 1, sMonInfoTextColors, 0, gText_WelcomeToHOFHOF);
     }
     else
     {

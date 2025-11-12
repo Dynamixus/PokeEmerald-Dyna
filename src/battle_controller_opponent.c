@@ -101,10 +101,6 @@ static void (*const sOpponentBufferCommands[CONTROLLER_CMDS_COUNT])(u32 battler)
     [CONTROLLER_CHOSENMONRETURNVALUE]     = BtlController_Empty,
     [CONTROLLER_ONERETURNVALUE]           = BtlController_Empty,
     [CONTROLLER_ONERETURNVALUE_DUPLICATE] = BtlController_Empty,
-    [CONTROLLER_CLEARUNKVAR]              = BtlController_HandleClearUnkVar,
-    [CONTROLLER_SETUNKVAR]                = BtlController_HandleSetUnkVar,
-    [CONTROLLER_CLEARUNKFLAG]             = BtlController_HandleClearUnkFlag,
-    [CONTROLLER_TOGGLEUNKFLAG]            = BtlController_HandleToggleUnkFlag,
     [CONTROLLER_HITANIMATION]             = BtlController_HandleHitAnimation,
     [CONTROLLER_CANTSWITCH]               = BtlController_Empty,
     [CONTROLLER_PLAYSE]                   = BtlController_HandlePlaySE,
@@ -668,6 +664,7 @@ static void OpponentHandleChoosePokemon(u32 battler)
 {
     s32 chosenMonId;
     s32 pokemonInBattle = 1;
+    enum SwitchType switchType = SWITCH_AFTER_KO;
 
     // Choosing Revival Blessing target
     if ((gBattleResources->bufferA[battler][1] & 0xF) == PARTY_ACTION_CHOOSE_FAINTED_MON)
@@ -677,7 +674,16 @@ static void OpponentHandleChoosePokemon(u32 battler)
     // Switching out
     else if (gBattleStruct->AI_monToSwitchIntoId[battler] == PARTY_SIZE)
     {
-        chosenMonId = GetMostSuitableMonToSwitchInto(battler, TRUE);
+        
+        if (IsSwitchOutEffect(gMovesInfo[gCurrentMove].effect) || AI_DATA->ejectButtonSwitch || AI_DATA->ejectPackSwitch)
+            switchType = SWITCH_MID_BATTLE;
+        
+        // reset the AI data to consider the correct on-field state at time of switch
+        SetBattlerAiData(GetBattlerAtPosition(B_POSITION_PLAYER_LEFT), AI_DATA);
+        if (IsDoubleBattle())
+            SetBattlerAiData(GetBattlerAtPosition(B_POSITION_PLAYER_RIGHT), AI_DATA);
+        
+        chosenMonId = GetMostSuitableMonToSwitchInto(battler, switchType);
         if (chosenMonId == PARTY_SIZE)
         {
             s32 battler1, battler2, firstId, lastId;

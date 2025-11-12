@@ -108,8 +108,8 @@
 #define VAR_SLATEPORT_CITY_STATE                         0x4058
 #define VAR_UNUSED_0x4059                                0x4059
 #define VAR_RUSTBORO_CITY_STATE                          0x405A
-#define VAR_FORTREE_CITY_STATE                           0x405B // Unused Var
-#define VAR_LILYCOVE_CITY_STATE                          0x405C // Unused Var
+#define VAR_ENTERING_HOT_HOUSE                           0x405B
+#define VAR_LEAVING_HOT_HOUSE                            0x405C
 #define VAR_MOSSDEEP_CITY_STATE                          0x405D
 #define VAR_SOOTOPOLIS_CITY_STATE                        0x405E
 #define VAR_EVER_GRANDE_CITY_STATE                       0x405F // Unused Var
@@ -145,8 +145,8 @@
 #define VAR_ROUTE130_STATE                               0x407D // Unused Var
 #define VAR_ROUTE131_STATE                               0x407E // Unused Var
 #define VAR_ROUTE132_STATE                               0x407F // Unused Var
-#define VAR_ROUTE133_STATE                               0x4080 // Unused Var
-#define VAR_ROUTE134_STATE                               0x4081 // Unused Var
+#define VAR_NATURE_ORDER                                 0x4080
+#define VAR_HP_BAR_SPEED                                 0x4081
 #define VAR_LITTLEROOT_HOUSES_STATE_MAY                  0x4082
 #define VAR_BLOCK_TRAINER_HILL                           0x4083 // BLOCK TRAINER HILL
 #define VAR_BIRCH_LAB_STATE                              0x4084
@@ -156,7 +156,7 @@
 #define VAR_CONTEST_TYPE                                 0x4088
 #define VAR_SECRET_BASE_INITIALIZED                      0x4089
 #define VAR_CONTEST_PRIZE_PICKUP                         0x408A
-#define VAR_UNUSED_0x408B                                0x408B // Unused Var
+#define VAR_BATTLE_SPEED                                 0x408B
 #define VAR_LITTLEROOT_HOUSES_STATE_BRENDAN              0x408C
 #define VAR_LITTLEROOT_RIVAL_STATE                       0x408D
 #define VAR_BOARD_BRINEY_BOAT_STATE                      0x408E
@@ -204,7 +204,7 @@
 #define VAR_MOVE_MANAGER                                 0x40B8
 #define VAR_MT_PYRE_STATE                                0x40B9
 #define VAR_NEW_MAUVILLE_STATE                           0x40BA
-#define VAR_UNUSED_0x40BB                                0x40BB // Unused Var
+#define VAR_HOT_HOUSE_STATE                              0x40BB
 #define VAR_BRAVO_TRAINER_BATTLE_TOWER_ON                0x40BC
 #define VAR_JAGGED_PASS_ASH_WEATHER                      0x40BD
 #define VAR_GLASS_WORKSHOP_STATE                         0x40BE
@@ -230,7 +230,7 @@
 #define VAR_SLATEPORT_OUTSIDE_MUSEUM_STATE               0x40D2
 #define VAR_DEX_UPGRADE_JOHTO_STARTER_STATE              0x40D3
 #define VAR_SS_TIDAL_SCOTT_STATE                         0x40D4 // Always equal to FLAG_MET_SCOTT_ON_SS_TIDAL
-#define VAR_GIVE_BIRTH_ISLAND_TICKET                     0x40D5
+#define VAR_GIVE_NAVEL_ISLAND_TICKET                     0x40D5
 #define VAR_TRAINER_HILL_IS_ACTIVE                       0x40D6
 #define VAR_SKY_PILLAR_RAYQUAZA_CRY_DONE                 0x40D7
 #define VAR_SOOTOPOLIS_WALLACE_STATE                     0x40D8
@@ -266,8 +266,8 @@
 #define VAR_RIVAL_RAYQUAZA_CALL_STEP_COUNTER             0x40F6
 #define VAR_STARTER_GEN                                  0x40F7
 #define VAR_UNUSED_0x40F8                                0x40F8 // Unused Var probably
-#define VAR_UNUSED_0x40F9                                0x40F9 // Unused Var
-#define VAR_UNUSED_0x40FA                                0x40FA // Unused Var
+#define VAR_UNUSED_0x40F9                                0x40F9 // Unused Var -- Repurposed for refilling trainer party in Battle Tower
+#define VAR_MONOTYPE_STARTER                             0x40FA
 #define VAR_BEAT_WATTSON                                 0x40FB
 #define VAR_FOUGHT_DAWN_111                              0x40FC 
 #define VAR_DEXNAV_SPECIES                               0x40FD // Registered dexnav species

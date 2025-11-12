@@ -1,5 +1,6 @@
 #include "global.h"
 #include "battle_tower.h"
+#include "battle_tower_team_preview.h"
 #include "apprentice.h"
 #include "event_data.h"
 #include "battle_setup.h"
@@ -76,6 +77,7 @@ static void FillFactoryFrontierTrainerParty(u16 trainerId, u8 firstMonId);
 static void FillFactoryTentTrainerParty(u16 trainerId, u8 firstMonId);
 static u8 GetFrontierTrainerFixedIvs(u16 trainerId);
 static void FillPartnerParty(u16 trainerId);
+static bool16 IsMegaFrontierMon(u16 monId);
 #if FREE_BATTLE_TOWER_E_READER == FALSE
 static void SetEReaderTrainerChecksum(struct BattleTowerEReaderTrainer *ereaderTrainer);
 #endif //FREE_BATTLE_TOWER_E_READER
@@ -84,6 +86,125 @@ static u8 SetTentPtrsGetLevel(void);
 #include "data/battle_frontier/battle_frontier_trainer_mons.h"
 #include "data/battle_frontier/battle_frontier_trainers.h"
 #include "data/battle_frontier/battle_frontier_mons.h"
+
+static const u16 sMegaFrontierMons[] = {
+    FRONTIER_MON_MEGA_VENUSAUR,
+    FRONTIER_MON_MEGA_CHARIZARD_X_1,
+    FRONTIER_MON_MEGA_CHARIZARD_X_2,
+    FRONTIER_MON_MEGA_CHARIZARD_Y,
+    FRONTIER_MON_MEGA_BLASTOISE_1,
+    FRONTIER_MON_MEGA_BLASTOISE_2,
+    FRONTIER_MON_MEGA_BUTTERFREE_1,
+    FRONTIER_MON_MEGA_BUTTERFREE_2,
+    FRONTIER_MON_MEGA_BEEDRILL,
+    FRONTIER_MON_MEGA_PIDGEOT_1,
+    FRONTIER_MON_MEGA_PIDGEOT_2,
+    FRONTIER_MON_MEGA_ALAKAZAM_1,
+    FRONTIER_MON_MEGA_ALAKAZAM_2,
+    FRONTIER_MON_MEGA_MACHAMP,
+    FRONTIER_MON_MEGA_SLOWBRO,
+    FRONTIER_MON_MEGA_GENGAR,
+    FRONTIER_MON_MEGA_STEELIX,
+    FRONTIER_MON_MEGA_KINGLER,
+    FRONTIER_MON_MEGA_KANGASKHAN,
+    FRONTIER_MON_MEGA_SCIZOR_1,
+    FRONTIER_MON_MEGA_SCIZOR_2,
+    FRONTIER_MON_MEGA_SCIZOR_3,
+    FRONTIER_MON_MEGA_PINSIR_1,
+    FRONTIER_MON_MEGA_PINSIR_2,
+    FRONTIER_MON_MEGA_GYARADOS_1,
+    FRONTIER_MON_MEGA_GYARADOS_2,
+    FRONTIER_MON_MEGA_LAPRAS,
+    FRONTIER_MON_MEGA_AERODACTYL,
+    FRONTIER_MON_MEGA_SNORLAX_1,
+    FRONTIER_MON_MEGA_SNORLAX_2,
+    FRONTIER_MON_MEGA_MEWTWO_X_1,
+    FRONTIER_MON_MEGA_MEWTWO_X_2,
+    FRONTIER_MON_MEGA_MEWTWO_Y_1,
+    FRONTIER_MON_MEGA_MEWTWO_Y_2,
+    FRONTIER_MON_MEGA_MEWTWO_Y_3,
+    FRONTIER_MON_MEGANIUM_1,
+    FRONTIER_MON_MEGANIUM_2,
+    FRONTIER_MON_MEGANIUM_3,
+    FRONTIER_MON_MEGA_AMPHAROS_1,
+    FRONTIER_MON_MEGA_AMPHAROS_2,
+    FRONTIER_MON_YANMEGA_1,
+    FRONTIER_MON_YANMEGA_2,
+    FRONTIER_MON_YANMEGA_3,
+    FRONTIER_MON_MEGA_HERACROSS_1,
+    FRONTIER_MON_MEGA_HERACROSS_2,
+    FRONTIER_MON_MEGA_HOUNDOOM,
+    FRONTIER_MON_MEGA_TYRANITAR_1,
+    FRONTIER_MON_MEGA_TYRANITAR_2,
+    FRONTIER_MON_MEGA_SCEPTILE_1,
+    FRONTIER_MON_MEGA_SCEPTILE_2,
+    FRONTIER_MON_MEGA_BLAZIKEN,
+    FRONTIER_MON_MEGA_SWAMPERT_1,
+    FRONTIER_MON_MEGA_SWAMPERT_2,
+    FRONTIER_MON_MEGA_GARDEVOIR_1,
+    FRONTIER_MON_MEGA_GARDEVOIR_2,
+    FRONTIER_MON_MEGA_GALLADE,
+    FRONTIER_MON_MEGA_SABLEYE_1,
+    FRONTIER_MON_MEGA_SABLEYE_2,
+    FRONTIER_MON_MEGA_MAWILE,
+    FRONTIER_MON_MEGA_AGGRON_1,
+    FRONTIER_MON_MEGA_AGGRON_2,
+    FRONTIER_MON_MEGA_MEDICHAM_1,
+    FRONTIER_MON_MEGA_MEDICHAM_2,
+    FRONTIER_MON_MEGA_MANECTRIC,
+    FRONTIER_MON_MEGA_SHARPEDO,
+    FRONTIER_MON_MEGA_CAMERUPT,
+    FRONTIER_MON_MEGA_ALTARIA_1,
+    FRONTIER_MON_MEGA_ALTARIA_2,
+    FRONTIER_MON_MEGA_BANETTE,
+    FRONTIER_MON_MEGA_ABSOL_1,
+    FRONTIER_MON_MEGA_ABSOL_2,
+    FRONTIER_MON_MEGA_GLALIE,
+    FRONTIER_MON_MEGA_SALAMENCE_1,
+    FRONTIER_MON_MEGA_SALAMENCE_2,
+    FRONTIER_MON_MEGA_SALAMENCE_3,
+    FRONTIER_MON_MEGA_METAGROSS_1,
+    FRONTIER_MON_MEGA_METAGROSS_2,
+    FRONTIER_MON_MEGA_LATIOS_1,
+    FRONTIER_MON_MEGA_LATIOS_2,
+    FRONTIER_MON_MEGA_LATIAS,
+    FRONTIER_MON_MEGA_RAYQUAZA_1,
+    FRONTIER_MON_MEGA_TORTERRA_1,
+    FRONTIER_MON_MEGA_TORTERRA_2,
+    FRONTIER_MON_MEGA_TORTERRA_3,
+    FRONTIER_MON_MEGA_TORTERRA_4,
+    FRONTIER_MON_MEGA_INFERNAPE_1,
+    FRONTIER_MON_MEGA_INFERNAPE_2,
+    FRONTIER_MON_MEGA_INFERNAPE_3,
+    FRONTIER_MON_MEGA_EMPOLEON_O_1,
+    FRONTIER_MON_MEGA_EMPOLEON_O_2,
+    FRONTIER_MON_MEGA_EMPOLEON_D_1,
+    FRONTIER_MON_MEGA_EMPOLEON_D_2,
+    FRONTIER_MON_MEGA_LUXRAY,
+    FRONTIER_MON_MEGA_LOPUNNY_1,
+    FRONTIER_MON_MEGA_LOPUNNY_2,
+    FRONTIER_MON_MEGA_GARCHOMP_1,
+    FRONTIER_MON_MEGA_GARCHOMP_2,
+    FRONTIER_MON_MEGA_LUCARIO_1,
+    FRONTIER_MON_MEGA_LUCARIO_2,
+    FRONTIER_MON_MEGA_ABOMASNOW_1,
+    FRONTIER_MON_MEGA_ABOMASNOW_2,
+    FRONTIER_MON_MEGA_ABOMASNOW_3,
+    FRONTIER_MON_MEGA_AUDINO,
+    FRONTIER_MON_MEGA_DIANCIE_1,
+    FRONTIER_MON_MEGA_DIANCIE_2,
+    FRONTIER_MON_MEGA_DIANCIE_3,
+    FRONTIER_MON_MEGA_ORBEETLE_1,
+    FRONTIER_MON_MEGA_ORBEETLE_2,
+    FRONTIER_MON_MEGA_DREDNAW_1,
+    FRONTIER_MON_MEGA_DREDNAW_2,
+    FRONTIER_MON_MEGA_COALOSSAL,
+    FRONTIER_MON_MEGA_SANDACONDA,
+    FRONTIER_MON_MEGA_TOXTRICITY,
+    FRONTIER_MON_MEGA_CENTISKORCH,
+    FRONTIER_MON_MEGA_GRIMMSNARL,
+    FRONTIER_MON_MEGA_COPPERAJAH,
+};
 
 const u8 gTowerMaleFacilityClasses[30] =
 {
@@ -749,7 +870,7 @@ static const u8 sApprenticeChallengeThreshold[MAX_APPRENTICE_QUESTIONS] =
 // Unclear why this was duplicated
 static const u8 sBattleTowerPartySizes2[] =
 {
-    [FRONTIER_MODE_SINGLES]     = FRONTIER_PARTY_SIZE,
+    [FRONTIER_MODE_SINGLES]     = FRONTIER_PARTY_SIZE_FULL,
     [FRONTIER_MODE_DOUBLES]     = FRONTIER_DOUBLES_PARTY_SIZE,
     [FRONTIER_MODE_MULTIS]      = FRONTIER_MULTI_PARTY_SIZE,
     [FRONTIER_MODE_LINK_MULTIS] = FRONTIER_MULTI_PARTY_SIZE,
@@ -786,7 +907,7 @@ static const u16 sUnused[] = { 179, 141, 200, 183 };
 
 static const u8 sBattleTowerPartySizes[FRONTIER_MODE_COUNT] =
 {
-    [FRONTIER_MODE_SINGLES]     = FRONTIER_PARTY_SIZE,
+    [FRONTIER_MODE_SINGLES]     = FRONTIER_PARTY_SIZE_FULL,
     [FRONTIER_MODE_DOUBLES]     = FRONTIER_DOUBLES_PARTY_SIZE,
     [FRONTIER_MODE_MULTIS]      = FRONTIER_MULTI_PARTY_SIZE,
     [FRONTIER_MODE_LINK_MULTIS] = FRONTIER_MULTI_PARTY_SIZE,
@@ -911,7 +1032,7 @@ static bool8 ChooseSpecialBattleTowerTrainer(void)
             checksum += record[j];
         }
         validMons = 0;
-        for (j = 0; j < MAX_FRONTIER_PARTY_SIZE; j++)
+        for (j = 0; j < FRONTIER_PARTY_SIZE_FULL; j++)
         {
             if (gSaveBlock2Ptr->frontier.towerRecords[i].party[j].species != SPECIES_NONE
                 && gSaveBlock2Ptr->frontier.towerRecords[i].party[j].level <= GetFrontierEnemyMonLevel(lvlMode))
@@ -1004,6 +1125,20 @@ static void SetNextFacilityOpponent(void)
             SetBattleFacilityTrainerGfxId(gTrainerBattleOpponent_A, 0);
             if (gSaveBlock2Ptr->frontier.curChallengeBattleNum + 1 < FRONTIER_STAGES_PER_CHALLENGE)
                 gSaveBlock2Ptr->frontier.trainerIds[gSaveBlock2Ptr->frontier.curChallengeBattleNum] = gTrainerBattleOpponent_A;
+        }
+        
+        // Generate the opponent's team first
+        if (battleMode == FRONTIER_MODE_MULTIS || battleMode == FRONTIER_MODE_LINK_MULTIS)
+        {
+            FillFrontierTrainersParties(FRONTIER_MULTI_PARTY_SIZE);
+        }
+        else if (battleMode == FRONTIER_MODE_DOUBLES)
+        {
+            FillFrontierTrainerParty(FRONTIER_DOUBLES_PARTY_SIZE);
+        }
+        else
+        {
+            FillFrontierTrainerParty(FRONTIER_PARTY_SIZE_FULL);
         }
     }
 }
@@ -1630,22 +1765,6 @@ void CreateFacilityMon(const struct TrainerMon *fmon, u16 level, u8 fixedIV, u32
         u32 data = TRUE;
         SetMonData(dst, MON_DATA_IS_SHINY, &data);
     }
-    if (fmon->dynamaxLevel > 0)
-    {
-        u32 data = fmon->dynamaxLevel;
-        SetMonData(dst, MON_DATA_DYNAMAX_LEVEL, &data);
-    }
-    if (fmon->gigantamaxFactor)
-    {
-        u32 data = fmon->gigantamaxFactor;
-        SetMonData(dst, MON_DATA_GIGANTAMAX_FACTOR, &data);
-    }
-    if (fmon->teraType)
-    {
-        u32 data = fmon->teraType;
-        SetMonData(dst, MON_DATA_TERA_TYPE, &data);
-    }
-
 
     SetMonData(dst, MON_DATA_POKEBALL, &ball);
     CalculateMonStats(dst);
@@ -1654,12 +1773,13 @@ void CreateFacilityMon(const struct TrainerMon *fmon, u16 level, u8 fixedIV, u32
 static void FillTrainerParty(u16 trainerId, u8 firstMonId, u8 monCount)
 {
     s32 i, j;
-    u16 chosenMonIndices[MAX_FRONTIER_PARTY_SIZE];
+    u16 chosenMonIndices[FRONTIER_PARTY_SIZE_FULL];
     u8 level = SetFacilityPtrsGetLevel();
     u8 fixedIV = 0;
     u8 bfMonCount;
     const u16 *monSet = NULL;
     u32 otID = 0;
+    u8 megaCount = 0;
 
     if (trainerId < FRONTIER_TRAINERS_COUNT)
     {
@@ -1670,7 +1790,7 @@ static void FillTrainerParty(u16 trainerId, u8 firstMonId, u8 monCount)
     else if (trainerId == TRAINER_EREADER)
     {
     #if FREE_BATTLE_TOWER_E_READER == FALSE
-        for (i = firstMonId; i < firstMonId + FRONTIER_PARTY_SIZE; i++)
+        for (i = firstMonId; i < firstMonId + FRONTIER_PARTY_SIZE_FULL; i++)
             CreateBattleTowerMon(&gEnemyParty[i], &gSaveBlock2Ptr->frontier.ereaderTrainer.party[i - firstMonId]);
     #endif //FREE_BATTLE_TOWER_E_READER
         return;
@@ -1694,17 +1814,16 @@ static void FillTrainerParty(u16 trainerId, u8 firstMonId, u8 monCount)
         return;
     }
     else
-    {
+    {   
         // Apprentice.
-        for (i = firstMonId; i < firstMonId + FRONTIER_PARTY_SIZE; i++)
+        for (i = firstMonId; i < firstMonId + FRONTIER_PARTY_SIZE_FULL; i++)
             CreateApprenticeMon(&gEnemyParty[i], &gSaveBlock2Ptr->apprentices[trainerId - TRAINER_RECORD_MIXING_APPRENTICE], i - firstMonId);
         return;
     }
 
     // Regular battle frontier trainer.
-    // Attempt to fill the trainer's party with random Pokémon until 3 have been
-    // successfully chosen. The trainer's party may not have duplicate Pokémon species
-    // or duplicate held items.
+    // Attempt to fill the trainer's party with random Pokémon until 6 have been
+    // successfully chosen. The trainer's party may not have duplicate Pokémon species.
     for (bfMonCount = 0; monSet[bfMonCount] != 0xFFFF; bfMonCount++)
         ;
     i = 0;
@@ -1715,8 +1834,21 @@ static void FillTrainerParty(u16 trainerId, u8 firstMonId, u8 monCount)
 
         // "High tier" Pokémon are only allowed on open level mode
         // 20 is not a possible value for level here
-        if ((level == FRONTIER_MAX_LEVEL_50 || level == 20) && monId > FRONTIER_MONS_HIGH_TIER)
-            continue;
+        //if ((level == FRONTIER_MAX_LEVEL_50 || level == 20) && monId > FRONTIER_MONS_HIGH_TIER)
+        //    continue;
+
+        // If a Mega Evolution, check if trainer already has one
+        if (IsMegaFrontierMon(monId))
+        {
+            if (megaCount == 0)
+            {
+                megaCount++;
+            }
+            else
+            {
+                continue;
+            }
+        }
 
         // Ensure this Pokémon species isn't a duplicate.
         for (j = 0; j < i + firstMonId; j++)
@@ -1728,14 +1860,14 @@ static void FillTrainerParty(u16 trainerId, u8 firstMonId, u8 monCount)
             continue;
 
         // Ensure this Pokemon's held item isn't a duplicate.
-        for (j = 0; j < i + firstMonId; j++)
-        {
-            if (GetMonData(&gEnemyParty[j], MON_DATA_HELD_ITEM, NULL) != ITEM_NONE
-             && GetMonData(&gEnemyParty[j], MON_DATA_HELD_ITEM, NULL) == gFacilityTrainerMons[monId].heldItem)
-                break;
-        }
-        if (j != i + firstMonId)
-            continue;
+        //for (j = 0; j < i + firstMonId; j++)
+        //{
+        //    if (GetMonData(&gEnemyParty[j], MON_DATA_HELD_ITEM, NULL) != ITEM_NONE
+        //     && GetMonData(&gEnemyParty[j], MON_DATA_HELD_ITEM, NULL) == gFacilityTrainerMons[monId].heldItem)
+        //        break;
+        //}
+        //if (j != i + firstMonId)
+        //    continue;
 
         // Ensure this exact Pokémon index isn't a duplicate. This check doesn't seem necessary
         // because the species and held items were already checked directly above.
@@ -1777,7 +1909,7 @@ static void UNUSED Unused_CreateApprenticeMons(u16 trainerId, u8 firstMonId)
     else
         level = FRONTIER_MAX_LEVEL_50;
 
-    for (i = 0; i != FRONTIER_PARTY_SIZE; i++)
+    for (i = 0; i != MULTI_PARTY_SIZE; i++)
     {
         CreateMonWithEVSpread(&gEnemyParty[firstMonId + i], apprentice->party[i].species, level, fixedIV, 8);
         friendship = MAX_FRIENDSHIP;
@@ -2005,7 +2137,10 @@ void DoSpecialTrainerBattle(void)
         switch (VarGet(VAR_FRONTIER_BATTLE_MODE))
         {
         case FRONTIER_MODE_SINGLES:
-            FillFrontierTrainerParty(FRONTIER_PARTY_SIZE);
+            if (VarGet(VAR_UNUSED_0x40F9) != 1)
+            {
+                FillFrontierTrainerParty(FRONTIER_PARTY_SIZE_FULL);
+            }
             break;
         case FRONTIER_MODE_DOUBLES:
             FillFrontierTrainerParty(FRONTIER_DOUBLES_PARTY_SIZE);
@@ -2186,7 +2321,9 @@ static void SaveBattleTowerRecord(void)
         playerRecord->speechLost[i] = gSaveBlock1Ptr->easyChatBattleLost[i];
     }
 
-    for (i = 0; i < MAX_FRONTIER_PARTY_SIZE; i++)
+    // Use different party sizes based on facility
+    u8 partySize = (VarGet(VAR_FRONTIER_FACILITY) == FRONTIER_FACILITY_TOWER || VarGet(VAR_FRONTIER_FACILITY) == FRONTIER_FACILITY_PYRAMID) ? FRONTIER_PARTY_SIZE_FULL : FRONTIER_DOUBLES_PARTY_SIZE;
+    for (i = 0; i < partySize; i++)
     {
         if (gSaveBlock2Ptr->frontier.selectedPartyMons[i] != 0)
             ConvertPokemonToBattleTowerPokemon(&gPlayerParty[gSaveBlock2Ptr->frontier.selectedPartyMons[i] - 1], &playerRecord->party[i]);
@@ -2778,7 +2915,7 @@ static void AwardBattleTowerRibbons(void)
     s32 i;
     u32 partyIndex;
 #ifdef BUGFIX
-    struct RibbonCounter ribbons[MAX_FRONTIER_PARTY_SIZE];
+    struct RibbonCounter ribbons[FRONTIER_PARTY_SIZE_FULL];
 #else
     struct RibbonCounter ribbons[3]; // BUG: 4 Pokémon can receive ribbons in a double battle mode.
 #endif
@@ -3244,6 +3381,16 @@ bool32 EmeraldBattleTowerRecordToRuby(struct EmeraldBattleTowerRecord *src, stru
         CalcRubyBattleTowerChecksum(dst);
         return TRUE;
     }
+}
+
+static bool16 IsMegaFrontierMon(u16 monId)
+{
+    for (u32 i = 0; i < ARRAY_COUNT(sMegaFrontierMons); i++)
+    {
+        if (sMegaFrontierMons[i] == monId)
+            return TRUE;
+    }
+    return FALSE;
 }
 
 void CalcApprenticeChecksum(struct Apprentice *apprentice)

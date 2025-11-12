@@ -122,10 +122,10 @@ gText_ApprenticeWhichLevelMode1::
 	.string "Which would be perfect for me?$"
 
 gText_ApprenticeLevelModeThanks1::
-	.string "{STR_VAR_1}, huh? That's true!\n"
-	.string "I'll do my best there!\p"
+	.string "Yay! I'm so excited! I need some\n"
+	.string "time to gather my thoughts.\p"
 	.string "If we meet here again, please teach\n"
-	.string "me something else, teacher!$"
+	.string "me how to be a good trainer, teacher!$"
 
 gText_ApprenticePleaseTeach2::
 	.string "Um… Are you {PLAYER}?\n"

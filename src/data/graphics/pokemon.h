@@ -1006,6 +1006,18 @@ const u32 gObjectEventPic_Substitute[] = INCBIN_COMP("graphics/pokemon/question_
     const u32 gMonShinyPalette_PikachuLibre[] = INCBIN_U32("graphics/pokemon/pikachu/libre/shiny.gbapal.lz");
     const u8 gMonIcon_PikachuLibre[] = INCBIN_U8("graphics/pokemon/pikachu/libre/icon.4bpp");
 
+    const u32 gMonFrontPic_PikachuSurfing[] = INCBIN_U32("graphics/pokemon/pikachu/surfing/front.4bpp.lz");
+    const u32 gMonPalette_PikachuSurfing[] = INCBIN_U32("graphics/pokemon/pikachu/surfing/normal.gbapal.lz");
+    const u32 gMonBackPic_PikachuSurfing[] = INCBIN_U32("graphics/pokemon/pikachu/surfing/back.4bpp.lz");
+    const u32 gMonShinyPalette_PikachuSurfing[] = INCBIN_U32("graphics/pokemon/pikachu/surfing/shiny.gbapal.lz");
+    const u8 gMonIcon_PikachuSurfing[] = INCBIN_U8("graphics/pokemon/pikachu/surfing/icon.4bpp");
+
+    const u32 gMonFrontPic_PikachuFlying[] = INCBIN_U32("graphics/pokemon/pikachu/flying/front.4bpp.lz");
+    const u32 gMonPalette_PikachuFlying[] = INCBIN_U32("graphics/pokemon/pikachu/flying/normal.gbapal.lz");
+    const u32 gMonBackPic_PikachuFlying[] = INCBIN_U32("graphics/pokemon/pikachu/flying/back.4bpp.lz");
+    const u32 gMonShinyPalette_PikachuFlying[] = INCBIN_U32("graphics/pokemon/pikachu/flying/shiny.gbapal.lz");
+    const u8 gMonIcon_PikachuFlying[] = INCBIN_U8("graphics/pokemon/pikachu/flying/icon.4bpp");
+
 #if OW_POKEMON_OBJECT_EVENTS
     // const u32 gObjectEventPic_PikachuCosplay[] = INCBIN_COMP("graphics/pokemon/pikachu/cosplay/overworld.4bpp");
     // const u32 gObjectEventPic_PikachuRockStar[] = INCBIN_COMP("graphics/pokemon/pikachu/rock_star/overworld.4bpp");
@@ -20803,6 +20815,33 @@ const u32 gObjectEventPic_Substitute[] = INCBIN_COMP("graphics/pokemon/question_
     const u32 gShinyOverworldPalette_Diancie[] = INCBIN_U32("graphics/pokemon/diancie/overworld_shiny.gbapal.lz");
 #endif //OW_PKMN_OBJECTS_SHARE_PALETTES
 #endif //OW_POKEMON_OBJECT_EVENTS
+
+// ruby diancie
+const u32 gMonFrontPic_DiancieRuby[] = INCBIN_U32("graphics/pokemon/diancie/ruby/anim_front.4bpp.lz");
+const u32 gMonBackPic_DiancieRuby[] = INCBIN_U32("graphics/pokemon/diancie/ruby/back.4bpp.lz");
+
+const u32 gMonPalette_DiancieRuby[] = INCBIN_U32("graphics/pokemon/diancie/ruby/normal.gbapal.lz");
+const u32 gMonShinyPalette_DiancieRuby[] = INCBIN_U32("graphics/pokemon/diancie/ruby/shiny.gbapal.lz");
+
+const u8 gMonIcon_DiancieRuby[] = INCBIN_U8("graphics/pokemon/diancie/ruby/icon.4bpp");
+
+const u32 gObjectEventPic_DiancieRuby[] = INCBIN_COMP("graphics/pokemon/diancie/ruby/overworld.4bpp");
+const u32 gOverworldPalette_DiancieRuby[] = INCBIN_U32("graphics/pokemon/diancie/ruby/overworld_normal.gbapal.lz");
+const u32 gShinyOverworldPalette_DiancieRuby[] = INCBIN_U32("graphics/pokemon/diancie/ruby/overworld_normal.gbapal.lz");
+
+
+// sapphire diancie
+const u32 gMonFrontPic_DiancieSapphire[] = INCBIN_U32("graphics/pokemon/diancie/sapphire/front.4bpp.lz");
+const u32 gMonBackPic_DiancieSapphire[] = INCBIN_U32("graphics/pokemon/diancie/sapphire/back.4bpp.lz");
+
+const u32 gMonPalette_DiancieSapphire[] = INCBIN_U32("graphics/pokemon/diancie/sapphire/normal.gbapal.lz");
+const u32 gMonShinyPalette_DiancieSapphire[] = INCBIN_U32("graphics/pokemon/diancie/sapphire/shiny.gbapal.lz");
+
+const u8 gMonIcon_DiancieSapphire[] = INCBIN_U8("graphics/pokemon/diancie/sapphire/icon.4bpp");
+
+const u32 gObjectEventPic_DiancieSapphire[] = INCBIN_COMP("graphics/pokemon/diancie/sapphire/overworld.4bpp");
+const u32 gOverworldPalette_DiancieSapphire[] = INCBIN_U32("graphics/pokemon/diancie/sapphire/overworld_normal.gbapal.lz");
+const u32 gShinyOverworldPalette_DiancieSapphire[] = INCBIN_U32("graphics/pokemon/diancie/sapphire/overworld_shiny.gbapal.lz");
 
 #if P_MEGA_EVOLUTIONS
     const u32 gMonFrontPic_DiancieMega[] = INCBIN_U32("graphics/pokemon/diancie/mega/front.4bpp.lz");

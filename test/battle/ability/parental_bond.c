@@ -94,7 +94,7 @@ DOUBLE_BATTLE_TEST("Parental Bond does not convert multi-target moves into a two
         ANIMATION(ANIM_TYPE_MOVE, MOVE_EARTHQUAKE, playerLeft);
         HP_BAR(opponentLeft);
         MESSAGE("It doesn't affect Pidgey…");
-        MESSAGE("It doesn't affect the opposing Pidgey…");
+        MESSAGE("It doesn't affect foe Pidgey…");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, playerRight);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponentLeft);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponentRight);
@@ -149,7 +149,7 @@ SINGLE_BATTLE_TEST("Parental Bond has no affect on multi hit moves and they stil
         MESSAGE("Kangaskhan has Mega Evolved into Mega Kangaskhan!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_COMET_PUNCH, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_COMET_PUNCH, player);
-        MESSAGE("The Pokémon was hit 2 time(s)!");
+        MESSAGE("Hit 2 time(s)!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponent);
     }
     THEN {
@@ -176,7 +176,7 @@ SINGLE_BATTLE_TEST("Parental Bond has no affect on multi hit moves and they stil
         ANIMATION(ANIM_TYPE_MOVE, MOVE_COMET_PUNCH, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_COMET_PUNCH, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_COMET_PUNCH, player);
-        MESSAGE("The Pokémon was hit 3 time(s)!");
+        MESSAGE("Hit 3 time(s)!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponent);
     }
     THEN {
@@ -204,7 +204,7 @@ SINGLE_BATTLE_TEST("Parental Bond has no affect on multi hit moves and they stil
         ANIMATION(ANIM_TYPE_MOVE, MOVE_COMET_PUNCH, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_COMET_PUNCH, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_COMET_PUNCH, player);
-        MESSAGE("The Pokémon was hit 4 time(s)!");
+        MESSAGE("Hit 4 time(s)!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponent);
     }
     THEN {
@@ -231,7 +231,7 @@ SINGLE_BATTLE_TEST("Parental Bond has no affect on multi hit moves and they stil
         ANIMATION(ANIM_TYPE_MOVE, MOVE_COMET_PUNCH, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_COMET_PUNCH, player);
         NOT ANIMATION(ANIM_TYPE_MOVE, MOVE_COMET_PUNCH, player);
-        MESSAGE("The Pokémon was hit 5 time(s)!");
+        MESSAGE("Hit 5 time(s)!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponent);
     }
     THEN {
@@ -255,9 +255,9 @@ SINGLE_BATTLE_TEST("Parental Bond Smack Down effect triggers after 2nd hit")
         MESSAGE("Kangaskhan has Mega Evolved into Mega Kangaskhan!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_SMACK_DOWN, player);
         HP_BAR(opponent);
-        NOT MESSAGE("The opposing Skarmory fell straight down!");
+        NOT MESSAGE("Foe Skarmory fell straight down!");
         HP_BAR(opponent);
-        MESSAGE("The opposing Skarmory fell straight down!");
+        MESSAGE("Foe Skarmory fell straight down!");
     } THEN {
         EXPECT_EQ(player->species, SPECIES_KANGASKHAN_MEGA);
     }
@@ -277,7 +277,7 @@ SINGLE_BATTLE_TEST("Parental Bond Snore strikes twice while asleep")
         ANIMATION(ANIM_TYPE_MOVE, MOVE_SNORE, player);
         HP_BAR(opponent, captureDamage: &damage[0]);
         HP_BAR(opponent, captureDamage: &damage[1]);
-        MESSAGE("The Pokémon was hit 2 time(s)!");
+        MESSAGE("Hit 2 time(s)!");
     } THEN {
         if (B_PARENTAL_BOND_DMG == GEN_6)
             EXPECT_MUL_EQ(damage[0], Q_4_12(0.5), damage[1]);
@@ -299,10 +299,44 @@ SINGLE_BATTLE_TEST("Parental Bond only triggers Dragon Tail's target switch out 
         ANIMATION(ANIM_TYPE_MOVE, MOVE_DRAGON_TAIL, player);
         HP_BAR(opponent);
         HP_BAR(opponent);
-        MESSAGE("The opposing Wynaut was dragged out!");
+        MESSAGE("Foe Wynaut was dragged out!");
     }
     THEN {
         EXPECT_EQ(player->species, SPECIES_KANGASKHAN_MEGA);
+    }
+}
+
+SINGLE_BATTLE_TEST("Parental Bond does not trigger on semi-invulnerable moves")
+{
+    GIVEN {
+        ASSUME(gMovesInfo[MOVE_FLY].category != DAMAGE_CATEGORY_STATUS);
+        ASSUME(gMovesInfo[MOVE_FLY].strikeCount < 2);
+        ASSUME(gMovesInfo[MOVE_FLY].effect == EFFECT_SEMI_INVULNERABLE);
+        PLAYER(SPECIES_KANGASKHAN) { Item(ITEM_KANGASKHANITE); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_FLY, gimmick: GIMMICK_MEGA); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { SKIP_TURN(player); }
+    } SCENE {
+        HP_BAR(opponent);
+        NOT HP_BAR(opponent);
+    }
+}
+
+SINGLE_BATTLE_TEST("Parental Bond does not trigger on two turn attacks")
+{
+    GIVEN {
+        ASSUME(gMovesInfo[MOVE_RAZOR_WIND].category != DAMAGE_CATEGORY_STATUS);
+        ASSUME(gMovesInfo[MOVE_RAZOR_WIND].strikeCount < 2);
+        ASSUME(gMovesInfo[MOVE_RAZOR_WIND].effect == EFFECT_TWO_TURNS_ATTACK);
+        PLAYER(SPECIES_KANGASKHAN) { Item(ITEM_KANGASKHANITE); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_RAZOR_WIND, gimmick: GIMMICK_MEGA); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { SKIP_TURN(player); }
+    } SCENE {
+        HP_BAR(opponent);
+        NOT HP_BAR(opponent);
     }
 }
 
