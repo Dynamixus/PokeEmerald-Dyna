@@ -64,18 +64,7 @@ struct
     SAVEBLOCK_CHUNK(struct SaveBlock1,  1),
     SAVEBLOCK_CHUNK(struct SaveBlock1,  2),
     SAVEBLOCK_CHUNK(struct SaveBlock1,  3),
-    SAVEBLOCK_CHUNK(struct SaveBlock1,  4),
-    SAVEBLOCK_CHUNK(struct SaveBlock1,  5),
-    SAVEBLOCK_CHUNK(struct SaveBlock1,  6),
-    SAVEBLOCK_CHUNK(struct SaveBlock1,  7),
-    SAVEBLOCK_CHUNK(struct SaveBlock1,  8),
-    SAVEBLOCK_CHUNK(struct SaveBlock1,  9),
-    SAVEBLOCK_CHUNK(struct SaveBlock1, 10),
-    SAVEBLOCK_CHUNK(struct SaveBlock1, 11),
-    SAVEBLOCK_CHUNK(struct SaveBlock1, 12),
-    SAVEBLOCK_CHUNK(struct SaveBlock1, 13), 
-    SAVEBLOCK_CHUNK(struct SaveBlock1, 14),
-    SAVEBLOCK_CHUNK(struct SaveBlock1, 15), // SECTOR_ID_SAVEBLOCK1_END
+    SAVEBLOCK_CHUNK(struct SaveBlock1,  4), // SECTOR_ID_SAVEBLOCK1_END
 
     SAVEBLOCK_CHUNK(struct PokemonStorage, 0), // SECTOR_ID_PKMN_STORAGE_START
     SAVEBLOCK_CHUNK(struct PokemonStorage, 1),
@@ -87,7 +76,13 @@ struct
     SAVEBLOCK_CHUNK(struct PokemonStorage, 7),
     SAVEBLOCK_CHUNK(struct PokemonStorage, 8),
     SAVEBLOCK_CHUNK(struct PokemonStorage, 9),
-    SAVEBLOCK_CHUNK(struct PokemonStorage, 10), // SECTOR_ID_PKMN_STORAGE_END 
+    SAVEBLOCK_CHUNK(struct PokemonStorage, 10),
+    SAVEBLOCK_CHUNK(struct PokemonStorage, 11),
+    SAVEBLOCK_CHUNK(struct PokemonStorage, 12),
+    SAVEBLOCK_CHUNK(struct PokemonStorage, 13),
+    SAVEBLOCK_CHUNK(struct PokemonStorage, 14),
+    SAVEBLOCK_CHUNK(struct PokemonStorage, 15),
+    SAVEBLOCK_CHUNK(struct PokemonStorage, 16), // SECTOR_ID_PKMN_STORAGE_END 
 };
 
 // These will produce an error if a save struct is larger than the space
