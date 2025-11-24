@@ -46,9 +46,9 @@
 #define FLAG_UNUSED_0x020    0x20 // Unused Flag
 #define FLAG_UNUSED_0x021    0x21 // Unused Flag
 #define FLAG_UNUSED_0x022    0x22 // Unused Flag
-#define FLAG_UNUSED_0x023    0x23 // Unused Flag
-#define FLAG_UNUSED_0x024    0x24 // Unused Flag
-#define FLAG_UNUSED_0x025    0x25 // Unused Flag
+#define FLAG_UNUSED_0x023    0x23 // DERBY_FLAG_NICKNAME
+#define FLAG_UNUSED_0x024    0x24 // DERBY_FLAG_RESET
+#define FLAG_UNUSED_0x025    0x25 // FLAPPY_VAR_HIGH_SCORE
 #define FLAG_UNUSED_0x026    0x26 // Unused Flag
 #define FLAG_UNUSED_0x027    0x27 // Unused Flag
 #define FLAG_UNUSED_0x028    0x28 // Unused Flag
@@ -656,13 +656,13 @@
 #define FLAG_HIDDEN_ITEM_ROUTE_123_RARE_CANDY                (FLAG_HIDDEN_ITEMS_START + 0x6E)
 #define FLAG_HIDDEN_ITEM_ROUTE_105_BIG_PEARL                 (FLAG_HIDDEN_ITEMS_START + 0x6F)
 
-#define FLAG_UNUSED_0x264  0x264 // Unused Flag
-#define FLAG_UNUSED_0x265  0x265 // Unused Flag
-#define FLAG_UNUSED_0x266  0x266 // Unused Flag
-#define FLAG_UNUSED_0x267  0x267 // Unused Flag
-#define FLAG_UNUSED_0x268  0x268 // Unused Flag
-#define FLAG_UNUSED_0x269  0x269 // Unused Flag
-#define FLAG_UNUSED_0x26A  0x26A // Unused Flag
+#define FLAG_UNUSED_0x264  0x264 // I_EXP_SHARE_FLAG
+#define FLAG_UNUSED_0x265  0x265 // VAR_LAST_REPEL_LURE_USED
+#define FLAG_UNUSED_0x266  0x266 // DN_FLAG_SEARCHING
+#define FLAG_UNUSED_0x267  0x267 // DN_FLAG_DEXNAV_GET
+#define FLAG_UNUSED_0x268  0x268 // DN_FLAG_DETECTOR_MODE
+#define FLAG_UNUSED_0x269  0x269 // DN_VAR_SPECIES
+#define FLAG_UNUSED_0x26A  0x26A // DN_VAR_STEP_COUNTER
 #define FLAG_UNUSED_0x26B  0x26B // Unused Flag
 #define FLAG_UNUSED_0x26C  0x26C // Unused Flag
 #define FLAG_UNUSED_0x26D  0x26D // Unused Flag
