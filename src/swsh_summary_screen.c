@@ -4402,6 +4402,20 @@ static void PrintMovePowerAndAccuracy(u16 moveIndex)
             ConvertIntToDecimalStringN(gStringVar1, (10 * (MAX_FRIENDSHIP - monFriendship) / 25), STR_CONV_MODE_RIGHT_ALIGN, 3);
             text = gStringVar1;
         }
+        else if (moveIndex == MOVE_HIDDEN_POWER)
+        {
+            u8 powerBits = ((GetMonData(mon, MON_DATA_HP_IV) & 2) >> 1)
+                     | ((GetMonData(mon, MON_DATA_ATK_IV) & 2) << 0)
+                     | ((GetMonData(mon, MON_DATA_DEF_IV) & 2) << 1)
+                     | ((GetMonData(mon, MON_DATA_SPEED_IV) & 2) << 2)
+                     | ((GetMonData(mon, MON_DATA_SPATK_IV)& 2) << 3)
+                     | ((GetMonData(mon, MON_DATA_SPDEF_IV) & 2) << 4);
+              
+            u8 powerForHiddenPower = (40 * powerBits) / 63 + 30;
+              
+            ConvertIntToDecimalStringN(gStringVar1, powerForHiddenPower, STR_CONV_MODE_RIGHT_ALIGN, 3);
+            text = gStringVar1;
+        }
         else if (gBattleMoves[moveIndex].power < 2)
         {
             text = gText_ThreeDashes;
