@@ -4393,16 +4393,16 @@ static void PrintMovePowerAndAccuracy(u16 moveIndex)
     if (moveIndex != MOVE_NONE)
     {
         if (moveIndex == MOVE_RETURN)
-+       {
-+           ConvertIntToDecimalStringN(gStringVar1, (10 * monFriendship / 25), STR_CONV_MODE_RIGHT_ALIGN, 3);
-+           text = gStringVar1;
-+       }
-+       else if (moveIndex == MOVE_FRUSTRATION)
-+       {
-+           ConvertIntToDecimalStringN(gStringVar1, (10 * (MAX_FRIENDSHIP - monFriendship) / 25), STR_CONV_MODE_RIGHT_ALIGN, 3);
-+           text = gStringVar1;
-+       }
-+       else if (gBattleMoves[moveIndex].power < 2)
+        {
+            ConvertIntToDecimalStringN(gStringVar1, (10 * monFriendship / 25), STR_CONV_MODE_RIGHT_ALIGN, 3);
+            text = gStringVar1;
+        }
+        else if (moveIndex == MOVE_FRUSTRATION)
+        {
+            ConvertIntToDecimalStringN(gStringVar1, (10 * (MAX_FRIENDSHIP - monFriendship) / 25), STR_CONV_MODE_RIGHT_ALIGN, 3);
+            text = gStringVar1;
+        }
+        else if (gBattleMoves[moveIndex].power < 2)
         {
             text = gText_ThreeDashes;
         }
