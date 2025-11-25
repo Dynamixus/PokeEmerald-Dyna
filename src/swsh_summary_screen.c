@@ -4385,6 +4385,7 @@ static void PrintMoveNameAndPP(u8 moveIndex)
 
 static void PrintMovePowerAndAccuracy(u16 moveIndex)
 {
+    struct Pokemon *mon = &sMonSummaryScreen->currentMon;
     const u8 *text;
     u8 monFriendship = GetMonData(&gPlayerParty[sMonSummaryScreen->curMonIndex], MON_DATA_FRIENDSHIP);
     u8 xPos;
@@ -4416,7 +4417,8 @@ static void PrintMovePowerAndAccuracy(u16 moveIndex)
             ConvertIntToDecimalStringN(gStringVar1, powerForHiddenPower, STR_CONV_MODE_RIGHT_ALIGN, 3);
             text = gStringVar1;
         }
-        else if (gBattleMoves[moveIndex].power < 2)
+
+        else if (gMovesInfo[moveIndex].power < 2)
         {
             text = gText_ThreeDashes;
         }
